@@ -1,18 +1,20 @@
 // ===== SERVICE WORKER - OFFLINE SUPPORT =====
-const CACHE_NAME = 'kalktrainer-v1';
+const CACHE_NAME = 'kalktrainer-v2';
+
+// Use relative paths from the root
 const ASSETS = [
-  '../',
-  '../index.html',
-  '../home.html',
-  '../trainer.html',
-  '../ergebnis.html',
-  '../profil.html',
-  '../css/style.css',
-  './profanity.js',
-  './profiles.js',
-  './generator.js',
-  '../manifest.json',
-  '../icons/icon.svg'
+  './',
+  './index.html',
+  './home.html',
+  './trainer.html',
+  './ergebnis.html',
+  './profil.html',
+  './css/style.css',
+  './js/profanity.js',
+  './js/profiles.js',
+  './js/generator.js',
+  './manifest.json',
+  './icons/icon.svg'
 ];
 
 // Install - Cache alle Assets
@@ -21,7 +23,12 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Caching assets...');
-        return cache.addAll(ASSETS);
+        // Cache assets one by one to avoid failures
+        return Promise.allSettled(
+          ASSETS.map(url => 
+            cache.add(url).catch(err => console.warn('Cache failed for:', url, err))
+          )
+        );
       })
       .then(() => self.skipWaiting())
   );
@@ -43,40 +50,34 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch - Aus Cache oder Netzwerk
+// Fetch - Network first, then cache
 self.addEventListener('fetch', (event) => {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') return;
+  
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then((response) => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        
-        // Clone the request
-        const fetchRequest = event.request.clone();
-        
-        return fetch(fetchRequest).then((response) => {
-          // Check if valid response
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          
-          // Clone the response
+        // Clone and cache successful responses
+        if (response && response.status === 200) {
           const responseToCache = response.clone();
-          
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
-          
-          return response;
-        }).catch(() => {
-          // Offline fallback for HTML pages
-          if (event.request.headers.get('accept').includes('text/html')) {
+        }
+        return response;
+      })
+      .catch(() => {
+        // Fallback to cache when offline
+        return caches.match(event.request).then((response) => {
+          if (response) {
+            return response;
+          }
+          // Return index.html for navigation requests
+          if (event.request.mode === 'navigate') {
             return caches.match('./index.html');
           }
         });
       })
   );
 });
-
