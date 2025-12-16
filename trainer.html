@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Übung | Kalkulations-Trainer</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <button type="button" class="header-back" onclick="goBack()">←</button>
+    <h1>Übung</h1>
+    <p id="sessionProgress">0 richtig</p>
+</header>
+
+<div class="container">
+
+    <!-- Task Selection -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Aufgabe wählen</span>
+        </div>
+        <div class="task-grid" id="taskGrid">
+            <!-- Buttons werden per JS generiert -->
+        </div>
+    </div>
+
+    <!-- Task Info -->
+    <div class="info-card" id="infoCard">
+        <div class="info-card-header">
+            <div>
+                <h3 id="infoTitle">Aufgabe</h3>
+                <p id="infoText"></p>
+                <span class="badge" id="infoBadge"></span>
+            </div>
+            <button type="button" class="info-help-btn" onclick="showCurrentTaskHelp()" title="Hilfe zur Aufgabe">?</button>
+        </div>
+    </div>
+
+    <!-- Result Card -->
+    <div class="result-card" id="resultCard">
+        <div class="result-icon" id="resultIcon">✅</div>
+        <h3 id="resultTitle">Richtig!</h3>
+        <p id="resultText">Super gemacht!</p>
+        <div class="result-values" id="resultValues"></div>
+    </div>
+
+    <!-- Calculator -->
+    <div class="card" id="calcCard">
+        
+        <!-- MEK Section (highlighted) -->
+        <div class="calc-row highlight">
+            <div class="row-header">
+                <div class="row-label">
+                    <span class="icon">📦</span> Listenpreis / Einkaufspreis
+                </div>
+                <button type="button" class="help-btn" onclick="showStepHelp('mek')">?</button>
+            </div>
+            <div class="input-group">
+                <div class="input-box">
+                    <input type="number" id="mek" step="0.01" placeholder="0,00" inputmode="decimal">
+                    <span class="unit">€</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="calc-row highlight">
+            <div class="row-header">
+                <div class="row-label">
+                    <span class="icon">📬</span> + Bezugskosten (Porto)
+                </div>
+                <button type="button" class="help-btn" onclick="showStepHelp('mek')">?</button>
+            </div>
+            <div class="row-hint warning">⚠️ ZUERST addieren, DANN Zuschlag!</div>
+            <div class="input-group">
+                <div class="input-box">
+                    <input type="number" id="porto" step="0.01" value="0" inputmode="decimal">
+                    <span class="unit">€</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="calc-row sum">
+            <div class="row-header">
+                <div class="row-label">= Materialeinzelkosten (MEK)</div>
+                <button type="button" class="help-btn" onclick="showStepHelp('mek')">?</button>
+            </div>
+            <div class="calc-result" id="resMek">0,00 €</div>
+        </div>
+
+        <!-- MGK -->
+        <div class="calc-row">
+            <div class="row-header">
+                <div class="row-label">
+                    <span class="icon">📊</span> + Materialgemeinkosten (MGK)
+                </div>
+                <button type="button" class="help-btn" onclick="showStepHelp('mgk')">?</button>
+            </div>
+            <div class="row-hint">Zuschlagssatz auf MEK</div>
+            <div class="input-group">
+                <div class="input-box small">
+                    <input type="number" id="mgk" step="0.1" value="35.4" inputmode="decimal">
+                    <span class="unit">%</span>
+                </div>
+                <span class="text-muted">→</span>
+                <span class="calc-result computed" id="resMgk">0,00 €</span>
+            </div>
+        </div>
+
+        <div class="calc-row sum">
+            <div class="row-header">
+                <div class="row-label">= Materialgesamtkosten (Mges)</div>
+                <button type="button" class="help-btn" onclick="showStepHelp('mges')">?</button>
+            </div>
+            <div class="calc-result" id="resMges">0,00 €</div>
+        </div>
+
+        <!-- Fertigung 1 -->
+        <div class="calc-row">
+            <div class="row-header">
+                <div class="row-label">
+                    <span class="icon">⏱️</span> + Fertigungskosten
+                </div>
+                <button type="button" class="help-btn" onclick="showStepHelp('fert')">?</button>
+            </div>
+            <div class="row-hint">Minuten ÷ 60 × Stundensatz</div>
+            <div class="input-group">
+                <div class="input-box small">
+                    <input type="number" id="min1" value="0" inputmode="numeric">
+                    <span class="unit">min</span>
+                </div>
+                <span class="text-muted">×</span>
+                <div class="input-box small">
+                    <input type="number" id="rate1" step="0.01" value="58.90" inputmode="decimal">
+                    <span class="unit">€/h</span>
+                </div>
+            </div>
+            <div class="calc-result computed" id="resFert1">0,00 €</div>
+        </div>
+
+        <!-- Fertigung 2 (optional) -->
+        <div class="calc-row" id="fert2Row" style="display: none;">
+            <div class="row-header">
+                <div class="row-label">
+                    <span class="icon">⏱️</span> + Weitere Arbeitszeit
+                </div>
+                <button type="button" class="help-btn" onclick="showStepHelp('fert')">?</button>
+            </div>
+            <div class="input-group">
+                <div class="input-box small">
+                    <input type="number" id="min2" value="0" inputmode="numeric">
+                    <span class="unit">min</span>
+                </div>
+                <span class="text-muted">×</span>
+                <div class="input-box small">
+                    <input type="number" id="rate2" step="0.01" value="60.50" inputmode="decimal">
+                    <span class="unit">€/h</span>
+                </div>
+            </div>
+            <div class="calc-result computed" id="resFert2">0,00 €</div>
+        </div>
+
+        <!-- Pauschale -->
+        <div class="calc-row">
+            <div class="row-header">
+                <div class="row-label">
+                    <span class="icon">🔧</span> + Pauschale
+                </div>
+                <button type="button" class="help-btn" onclick="showStepHelp('pausch')">?</button>
+            </div>
+            <div class="row-hint">Reinigung, Abformung, etc.</div>
+            <div class="input-group">
+                <div class="input-box">
+                    <input type="number" id="pausch" step="0.01" value="0" inputmode="decimal">
+                    <span class="unit">€</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="calc-row sum">
+            <div class="row-header">
+                <div class="row-label">= Selbstkosten (Sk)</div>
+                <button type="button" class="help-btn" onclick="showStepHelp('sk')">?</button>
+            </div>
+            <div class="calc-result" id="resSk">0,00 €</div>
+        </div>
+
+        <!-- Gewinn -->
+        <div class="calc-row">
+            <div class="row-header">
+                <div class="row-label">
+                    <span class="icon">💰</span> + Gewinn
+                </div>
+                <button type="button" class="help-btn" onclick="showStepHelp('gewinn')">?</button>
+            </div>
+            <div class="input-group">
+                <div class="input-box small">
+                    <input type="number" id="gewinn" step="0.1" placeholder="0" inputmode="decimal">
+                    <span class="unit">%</span>
+                </div>
+                <span class="text-muted">→</span>
+                <span class="calc-result computed" id="resGewinn">0,00 €</span>
+            </div>
+        </div>
+
+        <div class="calc-row sum">
+            <div class="row-header">
+                <div class="row-label">= Nettoverkaufspreis (NVP)</div>
+                <button type="button" class="help-btn" onclick="showStepHelp('nvp')">?</button>
+            </div>
+            <div class="calc-result" id="resNvp">0,00 €</div>
+        </div>
+
+        <!-- MwSt -->
+        <div class="calc-row">
+            <div class="row-header">
+                <div class="row-label">
+                    <span class="icon">🏛️</span> + Mehrwertsteuer (19%)
+                </div>
+                <button type="button" class="help-btn" onclick="showStepHelp('mwst')">?</button>
+            </div>
+            <div class="calc-result computed" id="resMwst">0,00 €</div>
+        </div>
+
+        <div class="calc-row final">
+            <div class="row-header">
+                <div class="row-label">
+                    <span class="icon">🎯</span> = Bruttoverkaufspreis (BVP)
+                </div>
+                <button type="button" class="help-btn" onclick="showStepHelp('bvp')" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);color:white;">?</button>
+            </div>
+            <div class="calc-result" id="resBvp">0,00 €</div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+        <button type="button" class="btn btn-secondary" onclick="resetCalc()">
+            🔄 Zurücksetzen
+        </button>
+        <button type="button" class="btn btn-primary" onclick="checkResult()">
+            ✓ Prüfen
+        </button>
+    </div>
+
+    <!-- End Session Button -->
+    <div class="actions single mt-1">
+        <a href="ergebnis.html" class="btn btn-success" onclick="endSession()" style="text-decoration:none;">
+            🏁 Übung beenden
+        </a>
+    </div>
+
+    <!-- Reference Card -->
+    <details class="ref-card">
+        <summary>📋 Betriebsdaten</summary>
+        <div class="ref-content">
+            <div class="ref-row">
+                <span>MGK Hörgeräte</span>
+                <span class="val">32,8 %</span>
+            </div>
+            <div class="ref-row">
+                <span>MGK Otoplastik/Material</span>
+                <span class="val">35,4 %</span>
+            </div>
+            <div class="ref-row">
+                <span>MGK Handelswaren</span>
+                <span class="val">108 %</span>
+            </div>
+            <div class="ref-row">
+                <span>Fert. HG-Anpassung</span>
+                <span class="val">60,50 €/Std</span>
+            </div>
+            <div class="ref-row">
+                <span>Fert. Audiometrie</span>
+                <span class="val">63,40 €/Std</span>
+            </div>
+            <div class="ref-row">
+                <span>Fert. Werkstatt/Labor</span>
+                <span class="val">58,90 €/Std</span>
+            </div>
+        </div>
+    </details>
+
+    <!-- Formula Card -->
+    <div class="formula-card">
+        <h4>📐 Formeln</h4>
+        <div class="formula-list">
+            MEK = Listenpreis + Porto<br>
+            MGK = MEK × %<br>
+            Fert = (Min ÷ 60) × €/h<br>
+            Sk = Mges + Fert<br>
+            NVP = Sk + Gewinn<br>
+            BVP = NVP × 1,19
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">Info</h3>
+            <button type="button" class="modal-close" id="modalClose">×</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="modalOk">Verstanden</button>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+var currentTask = 0;
+var stats = loadStats();
+
+// Task-Buttons generieren
+function initTaskButtons() {
+    var grid = document.getElementById('taskGrid');
+    grid.innerHTML = '';
+    
+    for (var i = 1; i <= 11; i++) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'task-btn';
+        btn.id = 't' + i;
+        btn.textContent = i;
+        btn.setAttribute('data-task', i);
+        
+        // Bereits gelöst?
+        if (stats.solvedTasks.indexOf(i) > -1) {
+            btn.classList.add('solved');
+        }
+        
+        (function(taskId) {
+            btn.onclick = function() { loadTask(taskId); };
+        })(i);
+        
+        grid.appendChild(btn);
+    }
+    
+    // Random Button
+    var randomBtn = document.createElement('button');
+    randomBtn.type = 'button';
+    randomBtn.className = 'task-btn random';
+    randomBtn.textContent = '🎲';
+    randomBtn.onclick = function() { loadRandomTask(); };
+    grid.appendChild(randomBtn);
+}
+
+// Aufgabe laden
+function loadTask(taskId) {
+    currentTask = taskId;
+    var task = TASKS[taskId];
+    
+    // Buttons aktualisieren
+    var btns = document.querySelectorAll('.task-btn');
+    btns.forEach(function(btn) {
+        btn.classList.remove('active');
+    });
+    document.getElementById('t' + taskId).classList.add('active');
+    
+    // Info anzeigen
+    document.getElementById('infoCard').classList.add('show');
+    document.getElementById('infoTitle').textContent = 'Aufgabe ' + taskId + ': ' + task.name;
+    document.getElementById('infoText').textContent = task.text;
+    document.getElementById('infoBadge').textContent = task.badge;
+    
+    // Result verstecken
+    document.getElementById('resultCard').classList.remove('show');
+    
+    // Felder zurücksetzen und füllen
+    resetFields();
+    
+    if (task.data) {
+        var d = task.data;
+        document.getElementById('mek').value = d.mek || '';
+        document.getElementById('porto').value = d.porto || 0;
+        document.getElementById('mgk').value = d.mgk || 35.4;
+        document.getElementById('min1').value = d.min1 || 0;
+        document.getElementById('rate1').value = d.rate1 || 58.90;
+        document.getElementById('min2').value = d.min2 || 0;
+        document.getElementById('rate2').value = d.rate2 || 60.50;
+        document.getElementById('pausch').value = d.pausch || 0;
+        document.getElementById('gewinn').value = d.gewinn || '';
+        
+        // Zweite Fertigung anzeigen?
+        document.getElementById('fert2Row').style.display = d.showFert2 ? 'block' : 'none';
+    }
+    
+    calc();
+    
+    // Scroll zur Info
+    document.getElementById('infoCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Zufällige Aufgabe
+function loadRandomTask() {
+    var unsolvedTasks = [];
+    for (var i = 1; i <= 11; i++) {
+        if (stats.solvedTasks.indexOf(i) === -1) {
+            unsolvedTasks.push(i);
+        }
+    }
+    
+    var pool = unsolvedTasks.length > 0 ? unsolvedTasks : [1,2,3,4,5,6,7,8,9,10,11];
+    var randomId = pool[Math.floor(Math.random() * pool.length)];
+    loadTask(randomId);
+}
+
+// Berechnung
+function calc() {
+    var values = {
+        mek: parseFloat(document.getElementById('mek').value) || 0,
+        porto: parseFloat(document.getElementById('porto').value) || 0,
+        mgk: parseFloat(document.getElementById('mgk').value) || 0,
+        min1: parseFloat(document.getElementById('min1').value) || 0,
+        rate1: parseFloat(document.getElementById('rate1').value) || 0,
+        min2: parseFloat(document.getElementById('min2').value) || 0,
+        rate2: parseFloat(document.getElementById('rate2').value) || 0,
+        pausch: parseFloat(document.getElementById('pausch').value) || 0,
+        gewinn: parseFloat(document.getElementById('gewinn').value) || 0
+    };
+    
+    var result = calculate(values);
+    
+    document.getElementById('resMek').textContent = eur(result.mekTotal);
+    document.getElementById('resMgk').textContent = eur(result.mgkVal);
+    document.getElementById('resMges').textContent = eur(result.mges);
+    document.getElementById('resFert1').textContent = eur(result.fert1);
+    document.getElementById('resFert2').textContent = eur(result.fert2);
+    document.getElementById('resSk').textContent = eur(result.sk);
+    document.getElementById('resGewinn').textContent = eur(result.gewinnVal);
+    document.getElementById('resNvp').textContent = eur(result.nvp);
+    document.getElementById('resMwst').textContent = eur(result.mwst);
+    document.getElementById('resBvp').textContent = eur(result.bvp);
+    
+    return result.bvp;
+}
+
+// Ergebnis prüfen
+function checkResult() {
+    if (!currentTask) {
+        alert('Bitte wähle zuerst eine Aufgabe!');
+        return;
+    }
+    
+    var task = TASKS[currentTask];
+    var resultCard = document.getElementById('resultCard');
+    
+    // Rückrechnungen: nur Lösung zeigen
+    if (task.type === 'reverse') {
+        resultCard.className = 'result-card show info';
+        document.getElementById('resultIcon').textContent = '📝';
+        document.getElementById('resultTitle').textContent = 'Musterlösung';
+        document.getElementById('resultText').textContent = 'Diese Aufgabe ist eine Rückrechnung.';
+        document.getElementById('resultValues').innerHTML = 
+            '<div class="result-val"><div class="label">Lösung</div><div class="number" style="color:var(--primary)">' + task.solution + '</div></div>';
+        resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Als versucht markieren
+        markTaskAttempted(currentTask, true);
+        updateSessionProgress();
+        return;
+    }
+    
+    // Vorwärtskalkulation prüfen
+    var myResult = calc();
+    var target = task.solution;
+    var diff = Math.abs(myResult - target);
+    var isCorrect = diff < 0.03;
+    
+    resultCard.className = 'result-card show ' + (isCorrect ? 'success' : 'error');
+    document.getElementById('resultIcon').textContent = isCorrect ? '✅' : '❌';
+    document.getElementById('resultTitle').textContent = isCorrect ? 'Richtig!' : 'Nicht ganz richtig';
+    document.getElementById('resultText').textContent = isCorrect ? 
+        'Super gemacht! Weiter so!' : 
+        'Differenz: ' + eur(diff) + ' – Prüfe deine Eingaben.';
+    
+    document.getElementById('resultValues').innerHTML = 
+        '<div class="result-val"><div class="label">Dein Ergebnis</div><div class="number" style="color:var(--primary)">' + eur(myResult) + '</div></div>' +
+        '<div class="result-val"><div class="label">Lösung</div><div class="number" style="color:var(--success)">' + eur(target) + '</div></div>';
+    
+    // Statistik aktualisieren
+    markTaskAttempted(currentTask, isCorrect);
+    
+    if (isCorrect && stats.solvedTasks.indexOf(currentTask) === -1) {
+        stats.solvedTasks.push(currentTask);
+        stats.totalSolved++;
+        stats.currentStreak++;
+        if (stats.currentStreak > stats.bestStreak) {
+            stats.bestStreak = stats.currentStreak;
+        }
+        saveStats(stats);
+        
+        // Button als gelöst markieren
+        document.getElementById('t' + currentTask).classList.add('solved');
+    } else if (!isCorrect) {
+        stats.currentStreak = 0;
+        saveStats(stats);
+    }
+    
+    updateSessionProgress();
+    resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Session-Fortschritt aktualisieren
+function updateSessionProgress() {
+    var text = currentSession.correct.length + ' richtig';
+    if (currentSession.wrong.length > 0) {
+        text += ', ' + currentSession.wrong.length + ' falsch';
+    }
+    document.getElementById('sessionProgress').textContent = text;
+}
+
+// Hilfe für aktuelle Aufgabe
+function showCurrentTaskHelp() {
+    if (currentTask) {
+        showTaskHelp(currentTask);
+    }
+}
+
+// Felder zurücksetzen
+function resetFields() {
+    document.getElementById('mek').value = '';
+    document.getElementById('porto').value = 0;
+    document.getElementById('mgk').value = 35.4;
+    document.getElementById('min1').value = 0;
+    document.getElementById('rate1').value = 58.90;
+    document.getElementById('min2').value = 0;
+    document.getElementById('rate2').value = 60.50;
+    document.getElementById('pausch').value = 0;
+    document.getElementById('gewinn').value = '';
+    document.getElementById('fert2Row').style.display = 'none';
+}
+
+function resetCalc() {
+    resetFields();
+    document.getElementById('infoCard').classList.remove('show');
+    document.getElementById('resultCard').classList.remove('show');
+    currentTask = 0;
+    
+    var btns = document.querySelectorAll('.task-btn');
+    btns.forEach(function(btn) {
+        btn.classList.remove('active');
+    });
+    
+    calc();
+}
+
+// Zurück zur Startseite
+function goBack() {
+    if (currentSession.attempted.length > 0) {
+        if (confirm('Übung beenden und zur Startseite?')) {
+            endSession();
+            window.location.href = 'index.html';
+        }
+    } else {
+        window.location.href = 'index.html';
+    }
+}
+
+// Input Events
+document.querySelectorAll('input').forEach(function(input) {
+    input.addEventListener('input', calc);
+    input.addEventListener('change', calc);
+});
+
+// Modal Events
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOk').addEventListener('click', closeModal);
+
+// Init
+startNewSession();
+initTaskButtons();
+calc();
+
+// URL-Parameter prüfen (für Zufalls-Start)
+var urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('random') === '1') {
+    loadRandomTask();
+}
+</script>
+
+</body>
+</html>
+

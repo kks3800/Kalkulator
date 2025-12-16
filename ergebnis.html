@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ergebnis | Kalkulations-Trainer</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <h1><span class="header-icon">🏁</span> Übung beendet</h1>
+    <p>Hier ist deine Zusammenfassung</p>
+</header>
+
+<div class="container">
+
+    <!-- Result Hero -->
+    <div class="card text-center" id="resultHero">
+        <div class="hero-icon" id="heroIcon">🎉</div>
+        <h2 id="heroTitle">Gut gemacht!</h2>
+        <p class="text-muted" id="heroText">Du hast fleißig geübt.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Diese Session</span>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number text-success" id="statCorrect">0</div>
+                <div class="stat-label">Richtig</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number text-danger" id="statWrong">0</div>
+                <div class="stat-label">Falsch</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statTotal">0</div>
+                <div class="stat-label">Versucht</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task List -->
+    <div class="card" id="taskListCard" style="display: none;">
+        <div class="card-header">
+            <span class="card-title">Bearbeitete Aufgaben</span>
+        </div>
+        <ul class="task-list" id="taskList">
+            <!-- Wird per JS gefüllt -->
+        </ul>
+    </div>
+
+    <!-- Overall Progress -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Gesamtfortschritt</span>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSolved">0</div>
+                <div class="stat-label">Gemeistert</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalRemaining">11</div>
+                <div class="stat-label">Offen</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalStreak">0</div>
+                <div class="stat-label">Beste Serie</div>
+            </div>
+        </div>
+        <div class="progress-bar mt-1">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <p class="text-center text-muted mt-1" id="progressText">0 von 11 Aufgaben gemeistert</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+        <a href="index.html" class="btn btn-secondary" style="text-decoration: none;">
+            🏠 Startseite
+        </a>
+        <a href="trainer.html" class="btn btn-primary" style="text-decoration: none;">
+            🔄 Nochmal üben
+        </a>
+    </div>
+
+    <!-- Motivational Card -->
+    <div class="card" id="tipCard">
+        <div class="card-header">
+            <span class="card-title">💡 Tipp</span>
+        </div>
+        <p class="text-muted" id="tipText">Übung macht den Meister! Versuch es morgen nochmal.</p>
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+<script>
+// Session-Daten laden
+var session = null;
+try {
+    var sessionData = sessionStorage.getItem('lastSession');
+    if (sessionData) {
+        session = JSON.parse(sessionData);
+    }
+} catch (e) {}
+
+// Fallback wenn keine Session-Daten
+if (!session) {
+    session = {
+        attempted: [],
+        correct: [],
+        wrong: []
+    };
+}
+
+// Statistiken laden
+var stats = loadStats();
+
+// Session-Stats anzeigen
+document.getElementById('statCorrect').textContent = session.correct.length;
+document.getElementById('statWrong').textContent = session.wrong.length;
+document.getElementById('statTotal').textContent = session.attempted.length;
+
+// Hero-Bereich basierend auf Ergebnis
+var correctCount = session.correct.length;
+var totalCount = session.attempted.length;
+var percentage = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+
+var heroIcon = document.getElementById('heroIcon');
+var heroTitle = document.getElementById('heroTitle');
+var heroText = document.getElementById('heroText');
+
+if (totalCount === 0) {
+    heroIcon.textContent = '🤔';
+    heroTitle.textContent = 'Keine Aufgaben bearbeitet';
+    heroText.textContent = 'Starte eine neue Übung, um zu trainieren!';
+} else if (percentage === 100) {
+    heroIcon.textContent = '🏆';
+    heroTitle.textContent = 'Perfekt!';
+    heroText.textContent = 'Alle ' + correctCount + ' Aufgaben richtig gelöst!';
+} else if (percentage >= 80) {
+    heroIcon.textContent = '🎉';
+    heroTitle.textContent = 'Sehr gut!';
+    heroText.textContent = correctCount + ' von ' + totalCount + ' richtig (' + percentage + '%)';
+} else if (percentage >= 50) {
+    heroIcon.textContent = '👍';
+    heroTitle.textContent = 'Gut gemacht!';
+    heroText.textContent = correctCount + ' von ' + totalCount + ' richtig (' + percentage + '%)';
+} else if (correctCount > 0) {
+    heroIcon.textContent = '💪';
+    heroTitle.textContent = 'Weiter so!';
+    heroText.textContent = correctCount + ' von ' + totalCount + ' richtig – Übung macht den Meister!';
+} else {
+    heroIcon.textContent = '📚';
+    heroTitle.textContent = 'Nicht aufgeben!';
+    heroText.textContent = 'Schau dir die Hilfe-Texte an und versuch es nochmal.';
+}
+
+// Task-Liste anzeigen
+if (session.attempted.length > 0) {
+    document.getElementById('taskListCard').style.display = 'block';
+    var taskList = document.getElementById('taskList');
+    taskList.innerHTML = '';
+    
+    session.attempted.forEach(function(taskId) {
+        var task = TASKS[taskId];
+        var isCorrect = session.correct.indexOf(taskId) > -1;
+        var isWrong = session.wrong.indexOf(taskId) > -1;
+        
+        var status = isCorrect ? 'correct' : (isWrong ? 'wrong' : 'skipped');
+        var icon = isCorrect ? '✓' : (isWrong ? '✗' : '–');
+        
+        var li = document.createElement('li');
+        li.className = 'task-list-item';
+        li.innerHTML = 
+            '<div class="task-list-icon ' + status + '">' + icon + '</div>' +
+            '<div class="task-list-content">' +
+                '<div class="task-list-title">Aufgabe ' + taskId + ': ' + task.name + '</div>' +
+                '<div class="task-list-subtitle">' + task.badge + '</div>' +
+            '</div>';
+        
+        taskList.appendChild(li);
+    });
+}
+
+// Gesamtfortschritt anzeigen
+var solved = stats.solvedTasks.length;
+var remaining = 11 - solved;
+var progress = Math.round((solved / 11) * 100);
+
+document.getElementById('totalSolved').textContent = solved;
+document.getElementById('totalRemaining').textContent = remaining;
+document.getElementById('totalStreak').textContent = stats.bestStreak;
+document.getElementById('progressFill').style.width = progress + '%';
+document.getElementById('progressText').textContent = solved + ' von 11 Aufgaben gemeistert';
+
+// Tipp basierend auf Fortschritt
+var tips = [
+    'Denke daran: Bei MEK zuerst Porto addieren, dann MGK-Zuschlag!',
+    'Handelswaren haben einen MGK von 108%, nicht 35,4%!',
+    'Arbeitszeit: Minuten durch 60 teilen, dann mal Stundensatz.',
+    'Rückrechnungen: Vom Brutto zum Netto, dann Schritt für Schritt zurück.',
+    'Nutze die (?)-Buttons für Erklärungen zu jedem Schritt!',
+    'Die Formelkarte am Ende der Seite hilft dir beim Überblick.',
+    'Bei Skonto: Erst Rabatt abziehen, dann Skonto berechnen!',
+    'Aufgabe 6 hat zwei verschiedene Arbeitszeiten mit verschiedenen Sätzen.',
+    'Übung macht den Meister! Versuch die schwierigen Aufgaben nochmal.',
+    'Du schaffst das! Morgen in der Prüfung wirst du glänzen! 💪'
+];
+
+var randomTip = tips[Math.floor(Math.random() * tips.length)];
+document.getElementById('tipText').textContent = randomTip;
+
+// Session-Storage leeren
+try {
+    sessionStorage.removeItem('lastSession');
+} catch (e) {}
+</script>
+
+</body>
+</html>
+

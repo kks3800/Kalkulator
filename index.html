@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kalkulations-Trainer | Hörakustik</title>
+    <meta name="description" content="Übungsapp für Preiskalkulation Hörakustik - Lernfeld 17.2">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <h1><span class="header-icon">📊</span> Kalkulations-Trainer</h1>
+    <p>Lernfeld 17.2 · Hörakustik</p>
+</header>
+
+<div class="container">
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-icon">🎯</div>
+        <h2>Prüfungsvorbereitung</h2>
+        <p>Übe alle 11 Kalkulationsaufgaben mit Schritt-für-Schritt Erklärungen</p>
+    </div>
+
+    <!-- Stats Card -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Dein Fortschritt</span>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="statSolved">0</div>
+                <div class="stat-label">Gelöst</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statStreak">0</div>
+                <div class="stat-label">Beste Serie</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statSessions">0</div>
+                <div class="stat-label">Sessions</div>
+            </div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <p class="text-center text-muted mt-1" id="progressText">0 von 11 Aufgaben gemeistert</p>
+    </div>
+
+    <!-- Last Session Info -->
+    <div class="card" id="lastSessionCard" style="display: none;">
+        <div class="card-header">
+            <span class="card-title">Letzte Übung</span>
+        </div>
+        <p class="text-muted" id="lastSessionText">—</p>
+    </div>
+
+    <!-- Main CTA -->
+    <a href="trainer.html" class="btn btn-primary btn-block btn-lg" style="text-decoration: none;">
+        🚀 Übung starten
+    </a>
+
+    <!-- Quick Actions -->
+    <div class="actions mt-2">
+        <a href="trainer.html?random=1" class="btn btn-secondary" style="text-decoration: none;">
+            🎲 Zufällige Aufgabe
+        </a>
+        <button type="button" class="btn btn-secondary" onclick="showFormulas()">
+            📐 Formeln
+        </button>
+    </div>
+
+    <!-- Reference Card -->
+    <details class="ref-card">
+        <summary>📋 Betriebsdaten (Zuschlagssätze)</summary>
+        <div class="ref-content">
+            <div class="ref-row">
+                <span>MGK Hörgeräte</span>
+                <span class="val">32,8 %</span>
+            </div>
+            <div class="ref-row">
+                <span>MGK Otoplastik/Material</span>
+                <span class="val">35,4 %</span>
+            </div>
+            <div class="ref-row">
+                <span>MGK Handelswaren</span>
+                <span class="val">108 %</span>
+            </div>
+            <div class="ref-row">
+                <span>Fert. HG-Anpassung</span>
+                <span class="val">60,50 €/Std</span>
+            </div>
+            <div class="ref-row">
+                <span>Fert. Audiometrie</span>
+                <span class="val">63,40 €/Std</span>
+            </div>
+            <div class="ref-row">
+                <span>Fert. Werkstatt/Labor</span>
+                <span class="val">58,90 €/Std</span>
+            </div>
+        </div>
+    </details>
+
+    <!-- Reset Stats -->
+    <div class="text-center mt-2">
+        <button type="button" class="btn btn-secondary" onclick="confirmReset()" style="font-size: 0.85rem; padding: 10px 16px;">
+            🗑️ Fortschritt zurücksetzen
+        </button>
+    </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">Info</h3>
+            <button type="button" class="modal-close" id="modalClose">×</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="modalOk">Verstanden</button>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+// Statistiken laden und anzeigen
+function updateDisplay() {
+    var stats = loadStats();
+    
+    document.getElementById('statSolved').textContent = stats.solvedTasks.length;
+    document.getElementById('statStreak').textContent = stats.bestStreak;
+    document.getElementById('statSessions').textContent = stats.sessions.length;
+    
+    var progress = Math.round((stats.solvedTasks.length / 11) * 100);
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('progressText').textContent = stats.solvedTasks.length + ' von 11 Aufgaben gemeistert';
+    
+    // Letzte Session anzeigen
+    if (stats.lastSession) {
+        var lastDate = new Date(stats.lastSession);
+        var now = new Date();
+        var diff = now - lastDate;
+        var diffHours = Math.floor(diff / (1000 * 60 * 60));
+        var diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+        
+        var timeText;
+        if (diffHours < 1) {
+            timeText = 'Gerade eben';
+        } else if (diffHours < 24) {
+            timeText = 'Vor ' + diffHours + ' Stunde' + (diffHours > 1 ? 'n' : '');
+        } else {
+            timeText = 'Vor ' + diffDays + ' Tag' + (diffDays > 1 ? 'en' : '');
+        }
+        
+        document.getElementById('lastSessionCard').style.display = 'block';
+        document.getElementById('lastSessionText').textContent = timeText;
+    }
+}
+
+// Formeln anzeigen
+function showFormulas() {
+    var content = '<div class="formula-card" style="margin:0;">';
+    content += '<div class="formula-list">';
+    content += 'MEK = Listenpreis + Bezugskosten<br>';
+    content += 'MGK = MEK × Zuschlagssatz<br>';
+    content += 'Mges = MEK + MGK<br>';
+    content += 'Fert = (Min ÷ 60) × €/Std<br>';
+    content += 'Sk = Mges + Fertigung<br>';
+    content += 'Gewinn = Sk × %<br>';
+    content += 'NVP = Sk + Gewinn<br>';
+    content += 'BVP = NVP × 1,19';
+    content += '</div></div>';
+    
+    showModal('📐 Formeln', content);
+}
+
+// Fortschritt zurücksetzen
+function confirmReset() {
+    if (confirm('Wirklich alle Statistiken löschen? Das kann nicht rückgängig gemacht werden.')) {
+        resetStats();
+        updateDisplay();
+        alert('Fortschritt wurde zurückgesetzt!');
+    }
+}
+
+// Modal Event Listeners
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOk').addEventListener('click', closeModal);
+
+// Start
+updateDisplay();
+</script>
+
+</body>
+</html>
+
