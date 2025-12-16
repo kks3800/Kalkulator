@@ -4,38 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ergebnis | Kalkulations-Trainer</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
-    <link rel="stylesheet" href="styles.css">
+    <meta name="theme-color" content="#0a0a1a">
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
 
-<!-- Header -->
-<header class="header">
-    <h1><span class="header-icon">🏁</span> Übung beendet</h1>
-    <p>Hier ist deine Zusammenfassung</p>
-</header>
+<!-- Animated Background -->
+<div class="bg-particles"></div>
 
 <div class="container">
 
     <!-- Result Hero -->
-    <div class="card text-center" id="resultHero">
-        <div class="hero-icon" id="heroIcon">🎉</div>
-        <h2 id="heroTitle">Gut gemacht!</h2>
+    <div class="card text-center" style="padding: 40px 20px;">
+        <div id="heroIcon" style="font-size: 5rem; margin-bottom: 16px; animation: bounce 0.6s ease;">🎉</div>
+        <h1 id="heroTitle" style="font-size: 1.75rem; margin-bottom: 8px;">Gut gemacht!</h1>
         <p class="text-muted" id="heroText">Du hast fleißig geübt.</p>
     </div>
 
-    <!-- Stats -->
+    <!-- Session Stats -->
     <div class="card">
         <div class="card-header">
             <span class="card-title">Diese Session</span>
         </div>
+        
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number text-success" id="statCorrect">0</div>
                 <div class="stat-label">Richtig</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number text-danger" id="statWrong">0</div>
+                <div class="stat-number" style="color: var(--danger);" id="statWrong">0</div>
                 <div class="stat-label">Falsch</div>
             </div>
             <div class="stat-card">
@@ -50,9 +50,7 @@
         <div class="card-header">
             <span class="card-title">Bearbeitete Aufgaben</span>
         </div>
-        <ul class="task-list" id="taskList">
-            <!-- Wird per JS gefüllt -->
-        </ul>
+        <ul id="taskList" style="list-style: none;"></ul>
     </div>
 
     <!-- Overall Progress -->
@@ -60,6 +58,7 @@
         <div class="card-header">
             <span class="card-title">Gesamtfortschritt</span>
         </div>
+        
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number" id="totalSolved">0</div>
@@ -74,68 +73,86 @@
                 <div class="stat-label">Beste Serie</div>
             </div>
         </div>
-        <div class="progress-bar mt-1">
+
+        <div class="progress-bar">
             <div class="progress-fill" id="progressFill" style="width: 0%"></div>
         </div>
         <p class="text-center text-muted mt-1" id="progressText">0 von 11 Aufgaben gemeistert</p>
     </div>
 
     <!-- Actions -->
-    <div class="actions">
-        <a href="index.html" class="btn btn-secondary" style="text-decoration: none;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+        <a href="./home.html" class="btn btn-secondary" style="text-decoration: none;">
             🏠 Startseite
         </a>
-        <a href="trainer.html" class="btn btn-primary" style="text-decoration: none;">
+        <a href="./trainer.html" class="btn btn-primary" style="text-decoration: none;">
             🔄 Nochmal üben
         </a>
     </div>
 
-    <!-- Motivational Card -->
-    <div class="card" id="tipCard">
+    <!-- Tip Card -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1)); border-color: var(--warning);">
         <div class="card-header">
-            <span class="card-title">💡 Tipp</span>
+            <span class="card-title" style="color: var(--warning);">💡 Tipp</span>
         </div>
-        <p class="text-muted" id="tipText">Übung macht den Meister! Versuch es morgen nochmal.</p>
+        <p class="text-muted" id="tipText" style="font-size: 0.9rem; line-height: 1.6;">
+            Übung macht den Meister!
+        </p>
     </div>
 
 </div>
 
-<script src="app.js"></script>
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+    <a href="./home.html" class="nav-item">
+        <span class="icon">🏠</span>
+        <span>Home</span>
+    </a>
+    <a href="./trainer.html" class="nav-item">
+        <span class="icon">📊</span>
+        <span>Üben</span>
+    </a>
+    <a href="./profil.html" class="nav-item">
+        <span class="icon">👤</span>
+        <span>Profil</span>
+    </a>
+</nav>
+
+<!-- Scripts -->
+<script src="./js/profanity.js"></script>
+<script src="./js/profiles.js"></script>
+<script src="./js/generator.js"></script>
 <script>
 // Session-Daten laden
-var session = null;
+let session = null;
 try {
-    var sessionData = sessionStorage.getItem('lastSession');
-    if (sessionData) {
-        session = JSON.parse(sessionData);
+    const data = sessionStorage.getItem('lastSession');
+    if (data) {
+        session = JSON.parse(data);
+        sessionStorage.removeItem('lastSession');
     }
 } catch (e) {}
 
-// Fallback wenn keine Session-Daten
 if (!session) {
-    session = {
-        attempted: [],
-        correct: [],
-        wrong: []
-    };
+    session = { attempted: [], correct: [], wrong: [] };
 }
 
-// Statistiken laden
-var stats = loadStats();
+// Profil-Stats
+const stats = PROFILES.getStats();
 
 // Session-Stats anzeigen
 document.getElementById('statCorrect').textContent = session.correct.length;
 document.getElementById('statWrong').textContent = session.wrong.length;
 document.getElementById('statTotal').textContent = session.attempted.length;
 
-// Hero-Bereich basierend auf Ergebnis
-var correctCount = session.correct.length;
-var totalCount = session.attempted.length;
-var percentage = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+// Hero basierend auf Ergebnis
+const correctCount = session.correct.length;
+const totalCount = session.attempted.length;
+const percentage = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
 
-var heroIcon = document.getElementById('heroIcon');
-var heroTitle = document.getElementById('heroTitle');
-var heroText = document.getElementById('heroText');
+const heroIcon = document.getElementById('heroIcon');
+const heroTitle = document.getElementById('heroTitle');
+const heroText = document.getElementById('heroText');
 
 if (totalCount === 0) {
     heroIcon.textContent = '🤔';
@@ -163,67 +180,100 @@ if (totalCount === 0) {
     heroText.textContent = 'Schau dir die Hilfe-Texte an und versuch es nochmal.';
 }
 
-// Task-Liste anzeigen
+// Task-Liste
 if (session.attempted.length > 0) {
     document.getElementById('taskListCard').style.display = 'block';
-    var taskList = document.getElementById('taskList');
-    taskList.innerHTML = '';
+    const taskList = document.getElementById('taskList');
     
-    session.attempted.forEach(function(taskId) {
-        var task = TASKS[taskId];
-        var isCorrect = session.correct.indexOf(taskId) > -1;
-        var isWrong = session.wrong.indexOf(taskId) > -1;
+    session.attempted.forEach(taskId => {
+        const task = GENERATOR.getOriginal(taskId);
+        const isCorrect = session.correct.includes(taskId);
+        const isWrong = session.wrong.includes(taskId);
         
-        var status = isCorrect ? 'correct' : (isWrong ? 'wrong' : 'skipped');
-        var icon = isCorrect ? '✓' : (isWrong ? '✗' : '–');
+        const li = document.createElement('li');
+        li.style.cssText = 'display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--glass-border);';
         
-        var li = document.createElement('li');
-        li.className = 'task-list-item';
-        li.innerHTML = 
-            '<div class="task-list-icon ' + status + '">' + icon + '</div>' +
-            '<div class="task-list-content">' +
-                '<div class="task-list-title">Aufgabe ' + taskId + ': ' + task.name + '</div>' +
-                '<div class="task-list-subtitle">' + task.badge + '</div>' +
-            '</div>';
+        const iconClass = isCorrect ? 'success' : (isWrong ? '' : '');
+        const iconBg = isCorrect ? 'var(--success)' : (isWrong ? 'var(--danger)' : 'var(--glass-bg)');
+        const icon = isCorrect ? '✓' : (isWrong ? '✗' : '–');
+        
+        li.innerHTML = `
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: ${iconBg}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                ${icon}
+            </div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600;">Aufgabe ${taskId}</div>
+                <div class="text-muted" style="font-size: 0.8rem;">${task ? task.name : ''}</div>
+            </div>
+        `;
         
         taskList.appendChild(li);
     });
 }
 
-// Gesamtfortschritt anzeigen
-var solved = stats.solvedTasks.length;
-var remaining = 11 - solved;
-var progress = Math.round((solved / 11) * 100);
+// Gesamtfortschritt
+if (stats) {
+    const solved = stats.solved;
+    const remaining = 11 - solved;
+    const progress = Math.round((solved / 11) * 100);
+    
+    document.getElementById('totalSolved').textContent = solved;
+    document.getElementById('totalRemaining').textContent = remaining;
+    document.getElementById('totalStreak').textContent = stats.bestStreak;
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('progressText').textContent = solved + ' von 11 Aufgaben gemeistert';
+}
 
-document.getElementById('totalSolved').textContent = solved;
-document.getElementById('totalRemaining').textContent = remaining;
-document.getElementById('totalStreak').textContent = stats.bestStreak;
-document.getElementById('progressFill').style.width = progress + '%';
-document.getElementById('progressText').textContent = solved + ' von 11 Aufgaben gemeistert';
-
-// Tipp basierend auf Fortschritt
-var tips = [
-    'Denke daran: Bei MEK zuerst Porto addieren, dann MGK-Zuschlag!',
+// Tipps
+const tips = [
+    'Bei MEK zuerst Porto addieren, dann MGK-Zuschlag!',
     'Handelswaren haben einen MGK von 108%, nicht 35,4%!',
     'Arbeitszeit: Minuten durch 60 teilen, dann mal Stundensatz.',
-    'Rückrechnungen: Vom Brutto zum Netto, dann Schritt für Schritt zurück.',
+    'Rückrechnungen: Vom Brutto schrittweise zurück rechnen.',
     'Nutze die (?)-Buttons für Erklärungen zu jedem Schritt!',
-    'Die Formelkarte am Ende der Seite hilft dir beim Überblick.',
     'Bei Skonto: Erst Rabatt abziehen, dann Skonto berechnen!',
-    'Aufgabe 6 hat zwei verschiedene Arbeitszeiten mit verschiedenen Sätzen.',
-    'Übung macht den Meister! Versuch die schwierigen Aufgaben nochmal.',
-    'Du schaffst das! Morgen in der Prüfung wirst du glänzen! 💪'
+    'Aufgabe 6 hat zwei verschiedene Arbeitszeiten!',
+    'Der Zufallsmodus hilft, die Konzepte besser zu verstehen.',
+    'Du schaffst das! Morgen in der Prüfung wirst du glänzen! 💪',
+    'Kleine Schritte führen zum großen Erfolg!'
 ];
 
-var randomTip = tips[Math.floor(Math.random() * tips.length)];
-document.getElementById('tipText').textContent = randomTip;
+document.getElementById('tipText').textContent = tips[Math.floor(Math.random() * tips.length)];
 
-// Session-Storage leeren
-try {
-    sessionStorage.removeItem('lastSession');
-} catch (e) {}
+// Konfetti-Effekt bei 100%
+if (percentage === 100 && totalCount > 0) {
+    // Simple confetti animation with CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes confetti {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            z-index: 1000;
+            animation: confetti 3s linear forwards;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    const colors = ['#00f5d4', '#ffd700', '#ff4757', '#00cc88', '#8b5cf6'];
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 5000);
+    }
+}
 </script>
 
 </body>
 </html>
-

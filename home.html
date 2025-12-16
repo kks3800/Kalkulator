@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard | Kalkulations-Trainer</title>
+    <meta name="theme-color" content="#0a0a1a">
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="bg-particles"></div>
+
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-icon">🎯</div>
+        <h1 id="welcomeTitle">Willkommen!</h1>
+        <p>Bereit zum Üben?</p>
+    </div>
+
+    <!-- Stats Card -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Dein Fortschritt</span>
+            <span class="badge" id="streakBadge">🔥 0 Serie</span>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="statSolved">0</div>
+                <div class="stat-label">Gelöst</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statAccuracy">0%</div>
+                <div class="stat-label">Genauigkeit</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statBest">0</div>
+                <div class="stat-label">Beste Serie</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <p class="text-center text-muted mt-1" id="progressText">0 von 11 Aufgaben gemeistert</p>
+    </div>
+
+    <!-- Quick Start -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Schnellstart</span>
+        </div>
+        
+        <a href="./trainer.html" class="btn btn-primary btn-block btn-lg mb-2" style="text-decoration: none;">
+            🚀 Übung starten
+        </a>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <a href="./trainer.html?random=1" class="btn btn-secondary" style="text-decoration: none;">
+                🎲 Zufällige Aufgabe
+            </a>
+            <a href="./trainer.html?mode=random" class="btn btn-secondary" style="text-decoration: none;">
+                🔀 Neue Zahlen
+            </a>
+        </div>
+    </div>
+
+    <!-- Task Overview -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Aufgaben-Übersicht</span>
+        </div>
+        
+        <div class="task-grid" id="taskGrid">
+            <!-- Wird per JS gefüllt -->
+        </div>
+        
+        <p class="text-center text-muted mt-2" style="font-size: 0.8rem;">
+            Tippe auf eine Aufgabe, um direkt zu starten
+        </p>
+    </div>
+
+    <!-- Reference Card -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">📋 Betriebsdaten</span>
+        </div>
+        
+        <div style="display: grid; gap: 8px; font-size: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--glass-border);">
+                <span class="text-muted">MGK Hörgeräte</span>
+                <span class="text-accent">32,8 %</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--glass-border);">
+                <span class="text-muted">MGK Otoplastik/Material</span>
+                <span class="text-accent">35,4 %</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--glass-border);">
+                <span class="text-muted">MGK Handelswaren</span>
+                <span class="text-warning">108 %</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--glass-border);">
+                <span class="text-muted">Fert. HG-Anpassung</span>
+                <span class="text-accent">60,50 €/h</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--glass-border);">
+                <span class="text-muted">Fert. Audiometrie</span>
+                <span class="text-accent">63,40 €/h</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                <span class="text-muted">Fert. Werkstatt/Labor</span>
+                <span class="text-accent">58,90 €/h</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulas Card -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(30, 30, 50, 0.9), rgba(20, 20, 40, 0.9));">
+        <div class="card-header">
+            <span class="card-title">📐 Formeln</span>
+        </div>
+        
+        <div style="font-family: monospace; font-size: 0.85rem; color: var(--accent); line-height: 2;">
+            MEK = Listenpreis + Porto<br>
+            MGK = MEK × Zuschlag%<br>
+            Mges = MEK + MGK<br>
+            Fert = (Min ÷ 60) × €/h<br>
+            Sk = Mges + Fertigung<br>
+            NVP = Sk + Gewinn<br>
+            BVP = NVP × 1,19
+        </div>
+    </div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+    <a href="./home.html" class="nav-item active">
+        <span class="icon">🏠</span>
+        <span>Home</span>
+    </a>
+    <a href="./trainer.html" class="nav-item">
+        <span class="icon">📊</span>
+        <span>Üben</span>
+    </a>
+    <a href="./profil.html" class="nav-item">
+        <span class="icon">👤</span>
+        <span>Profil</span>
+    </a>
+</nav>
+
+<!-- Scripts -->
+<script src="./js/profanity.js"></script>
+<script src="./js/profiles.js"></script>
+<script src="./js/generator.js"></script>
+<script>
+// Profil prüfen
+const profile = PROFILES.getCurrent();
+if (!profile) {
+    window.location.href = './index.html';
+}
+
+// Stats laden
+const stats = PROFILES.getStats();
+
+// Willkommen
+document.getElementById('welcomeTitle').textContent = `Hallo, ${stats.name}!`;
+
+// Statistiken anzeigen
+document.getElementById('statSolved').textContent = stats.solved;
+document.getElementById('statAccuracy').textContent = stats.accuracy + '%';
+document.getElementById('statBest').textContent = stats.bestStreak;
+document.getElementById('streakBadge').textContent = '🔥 ' + stats.currentStreak + ' Serie';
+
+// Progress Bar
+const progress = Math.round((stats.solved / 11) * 100);
+document.getElementById('progressFill').style.width = progress + '%';
+document.getElementById('progressText').textContent = stats.solved + ' von 11 Aufgaben gemeistert';
+
+// Task Grid
+const taskGrid = document.getElementById('taskGrid');
+const taskIds = GENERATOR.getAllTaskIds();
+
+taskIds.forEach(id => {
+    const btn = document.createElement('a');
+    btn.href = './trainer.html?task=' + id;
+    btn.className = 'task-btn';
+    
+    if (stats.solvedTasks.includes(id)) {
+        btn.classList.add('solved');
+    }
+    
+    btn.innerHTML = '<span>' + id + '</span>';
+    taskGrid.appendChild(btn);
+});
+
+// Random Button
+const randomBtn = document.createElement('a');
+randomBtn.href = './trainer.html?random=1';
+randomBtn.className = 'task-btn random';
+randomBtn.innerHTML = '<span>🎲</span>';
+taskGrid.appendChild(randomBtn);
+</script>
+
+</body>
+</html>
+

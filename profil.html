@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Profil | Kalkulations-Trainer</title>
+    <meta name="theme-color" content="#0a0a1a">
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="bg-particles"></div>
+
+<div class="container">
+
+    <!-- Profile Header -->
+    <div class="card text-center" style="padding: 30px 20px;">
+        <div id="profileAvatar" style="width: 80px; height: 80px; margin: 0 auto 16px; background: linear-gradient(135deg, var(--accent), var(--success)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">
+            👤
+        </div>
+        <h1 id="profileName" style="font-size: 1.5rem; margin-bottom: 4px;">Name</h1>
+        <p class="text-muted" id="profileDate">Dabei seit ...</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Statistiken</span>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="statSolved">0</div>
+                <div class="stat-label">Gelöst</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statAccuracy">0%</div>
+                <div class="stat-label">Genauigkeit</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statStreak">0</div>
+                <div class="stat-label">Beste Serie</div>
+            </div>
+        </div>
+
+        <div class="progress-bar mt-2">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <p class="text-center text-muted mt-1" id="progressText">0 von 11 Aufgaben gemeistert</p>
+    </div>
+
+    <!-- Detailed Stats -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Details</span>
+        </div>
+        
+        <div style="display: grid; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--glass-border);">
+                <span class="text-muted">Gesamt richtig</span>
+                <span class="text-accent" id="detailCorrect">0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--glass-border);">
+                <span class="text-muted">Gesamt Versuche</span>
+                <span id="detailAttempts">0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--glass-border);">
+                <span class="text-muted">Sessions</span>
+                <span id="detailSessions">0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 12px 0;">
+                <span class="text-muted">Aktuelle Serie</span>
+                <span class="text-warning" id="detailCurrentStreak">0 🔥</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Solved Tasks -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Gemeisterte Aufgaben</span>
+        </div>
+        
+        <div class="task-grid" id="solvedGrid" style="margin-bottom: 8px;"></div>
+        <p class="text-center text-muted" style="font-size: 0.8rem;" id="solvedInfo">
+            Grüne Aufgaben wurden gelöst
+        </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Aktionen</span>
+        </div>
+        
+        <button type="button" class="btn btn-secondary btn-block mb-2" onclick="switchProfile()">
+            🔄 Profil wechseln
+        </button>
+        
+        <button type="button" class="btn btn-secondary btn-block mb-2" onclick="resetProgress()">
+            📊 Fortschritt zurücksetzen
+        </button>
+        
+        <button type="button" class="btn btn-danger btn-block" onclick="deleteProfile()">
+            🗑️ Profil löschen
+        </button>
+    </div>
+
+    <!-- App Info -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">ℹ️ Über die App</span>
+        </div>
+        <p class="text-muted" style="font-size: 0.85rem; line-height: 1.6;">
+            Kalkulations-Trainer für Hörakustik<br>
+            Lernfeld 17.2 – Preiskalkulation<br><br>
+            Version 2.0 · Made with ❤️
+        </p>
+    </div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+    <a href="./home.html" class="nav-item">
+        <span class="icon">🏠</span>
+        <span>Home</span>
+    </a>
+    <a href="./trainer.html" class="nav-item">
+        <span class="icon">📊</span>
+        <span>Üben</span>
+    </a>
+    <a href="./profil.html" class="nav-item active">
+        <span class="icon">👤</span>
+        <span>Profil</span>
+    </a>
+</nav>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">Bestätigen</h3>
+            <button type="button" class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer" id="modalFooter"></div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="./js/profanity.js"></script>
+<script src="./js/profiles.js"></script>
+<script src="./js/generator.js"></script>
+<script>
+// Profil prüfen
+const profile = PROFILES.getCurrent();
+if (!profile) {
+    window.location.href = './index.html';
+}
+
+const stats = PROFILES.getStats();
+
+// Avatar
+const avatars = ['👤', '🎓', '📚', '💪', '🎯', '⭐', '🏆', '🚀'];
+document.getElementById('profileAvatar').textContent = avatars[stats.name.length % avatars.length];
+
+// Profilinfo
+document.getElementById('profileName').textContent = stats.name;
+
+const created = new Date(profile.data.created);
+const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+document.getElementById('profileDate').textContent = 'Dabei seit ' + months[created.getMonth()] + ' ' + created.getFullYear();
+
+// Statistiken
+document.getElementById('statSolved').textContent = stats.solved;
+document.getElementById('statAccuracy').textContent = stats.accuracy + '%';
+document.getElementById('statStreak').textContent = stats.bestStreak;
+
+document.getElementById('detailCorrect').textContent = stats.totalCorrect;
+document.getElementById('detailAttempts').textContent = stats.totalAttempts;
+document.getElementById('detailSessions').textContent = stats.sessionsCount;
+document.getElementById('detailCurrentStreak').textContent = stats.currentStreak + ' 🔥';
+
+// Progress
+const progress = Math.round((stats.solved / 11) * 100);
+document.getElementById('progressFill').style.width = progress + '%';
+document.getElementById('progressText').textContent = stats.solved + ' von 11 Aufgaben gemeistert';
+
+// Solved Grid
+const solvedGrid = document.getElementById('solvedGrid');
+GENERATOR.getAllTaskIds().forEach(id => {
+    const div = document.createElement('div');
+    div.className = 'task-btn';
+    div.style.cursor = 'default';
+    div.innerHTML = '<span>' + id + '</span>';
+    
+    if (stats.solvedTasks.includes(id)) {
+        div.classList.add('solved');
+    }
+    
+    solvedGrid.appendChild(div);
+});
+
+document.getElementById('solvedInfo').textContent = stats.solved + ' von 11 Aufgaben gemeistert';
+
+// Modal
+function showModal(title, body, footer) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').innerHTML = body;
+    document.getElementById('modalFooter').innerHTML = footer;
+    document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+}
+
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modalOverlay') closeModal();
+});
+
+// Profil wechseln
+function switchProfile() {
+    showModal(
+        '🔄 Profil wechseln',
+        '<p class="text-muted">Du wirst ausgeloggt und kannst ein anderes Profil wählen oder ein neues erstellen.</p>',
+        '<div style="display: flex; gap: 12px;"><button class="btn btn-secondary" style="flex:1;" onclick="closeModal()">Abbrechen</button><button class="btn btn-primary" style="flex:1;" onclick="doSwitchProfile()">Wechseln</button></div>'
+    );
+}
+
+function doSwitchProfile() {
+    PROFILES.logout();
+    window.location.href = './index.html';
+}
+
+// Fortschritt zurücksetzen
+function resetProgress() {
+    showModal(
+        '📊 Fortschritt zurücksetzen',
+        '<p class="text-muted">Alle gelösten Aufgaben und Statistiken werden zurückgesetzt. Dein Profil bleibt erhalten.</p><p style="color: var(--warning); margin-top: 12px;">⚠️ Diese Aktion kann nicht rückgängig gemacht werden!</p>',
+        '<div style="display: flex; gap: 12px;"><button class="btn btn-secondary" style="flex:1;" onclick="closeModal()">Abbrechen</button><button class="btn btn-warning" style="flex:1; background: var(--warning); color: var(--bg-dark);" onclick="doResetProgress()">Zurücksetzen</button></div>'
+    );
+}
+
+function doResetProgress() {
+    PROFILES.update({
+        solvedTasks: [],
+        totalCorrect: 0,
+        totalAttempts: 0,
+        bestStreak: 0,
+        currentStreak: 0,
+        sessions: []
+    });
+    window.location.reload();
+}
+
+// Profil löschen
+function deleteProfile() {
+    showModal(
+        '🗑️ Profil löschen',
+        '<p class="text-muted">Dein Profil <strong>"' + stats.name + '"</strong> wird vollständig gelöscht.</p><p style="color: var(--danger); margin-top: 12px;">⚠️ Diese Aktion kann nicht rückgängig gemacht werden!</p>',
+        '<div style="display: flex; gap: 12px;"><button class="btn btn-secondary" style="flex:1;" onclick="closeModal()">Abbrechen</button><button class="btn btn-danger" style="flex:1;" onclick="doDeleteProfile()">Löschen</button></div>'
+    );
+}
+
+function doDeleteProfile() {
+    PROFILES.remove(stats.name);
+    window.location.href = './index.html';
+}
+</script>
+
+</body>
+</html>
+

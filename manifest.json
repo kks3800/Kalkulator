@@ -1,0 +1,22 @@
+{
+  "name": "Kalkulations-Trainer",
+  "short_name": "KalkTrainer",
+  "description": "Übungsapp für Preiskalkulation Hörakustik - Lernfeld 17.2",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0a0a1a",
+  "background_color": "#0a0a1a",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "utilities"],
+  "lang": "de",
+  "dir": "ltr"
+}
+

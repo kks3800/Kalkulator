@@ -3,204 +3,314 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kalkulations-Trainer | Hörakustik</title>
+    <title>Kalkulations-Trainer | Anmelden</title>
     <meta name="description" content="Übungsapp für Preiskalkulation Hörakustik - Lernfeld 17.2">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
-    <link rel="stylesheet" href="styles.css">
+    <meta name="theme-color" content="#0a0a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./icons/icon.svg">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
 
-<!-- Header -->
-<header class="header">
-    <h1><span class="header-icon">📊</span> Kalkulations-Trainer</h1>
-    <p>Lernfeld 17.2 · Hörakustik</p>
-</header>
+<!-- Animated Background -->
+<div class="bg-particles"></div>
 
 <div class="container">
 
-    <!-- Hero Section -->
-    <div class="hero">
-        <div class="hero-icon">🎯</div>
-        <h2>Prüfungsvorbereitung</h2>
-        <p>Übe alle 11 Kalkulationsaufgaben mit Schritt-für-Schritt Erklärungen</p>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-icon">📊</div>
+        <h1>Kalkulations-Trainer</h1>
+        <p>Lernfeld 17.2 · Hörakustik</p>
     </div>
 
-    <!-- Stats Card -->
-    <div class="card">
+    <!-- Login Card -->
+    <div class="card" id="loginCard">
         <div class="card-header">
-            <span class="card-title">Dein Fortschritt</span>
+            <span class="card-title">Willkommen</span>
         </div>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number" id="statSolved">0</div>
-                <div class="stat-label">Gelöst</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="statStreak">0</div>
-                <div class="stat-label">Beste Serie</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="statSessions">0</div>
-                <div class="stat-label">Sessions</div>
-            </div>
-        </div>
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-        </div>
-        <p class="text-center text-muted mt-1" id="progressText">0 von 11 Aufgaben gemeistert</p>
-    </div>
+        
+        <p class="text-muted mb-2">
+            Gib deinen Namen ein, um zu starten oder dein Profil zu laden.
+        </p>
 
-    <!-- Last Session Info -->
-    <div class="card" id="lastSessionCard" style="display: none;">
-        <div class="card-header">
-            <span class="card-title">Letzte Übung</span>
+        <div class="input-group">
+            <label class="input-label" for="nameInput">Dein Name</label>
+            <input 
+                type="text" 
+                id="nameInput" 
+                class="input-field" 
+                placeholder="z.B. Max"
+                maxlength="20"
+                autocomplete="off"
+                autocapitalize="words"
+            >
+            <div class="input-error" id="nameError" style="display: none;">
+                <span>⚠️</span>
+                <span id="errorText"></span>
+            </div>
         </div>
-        <p class="text-muted" id="lastSessionText">—</p>
-    </div>
 
-    <!-- Main CTA -->
-    <a href="trainer.html" class="btn btn-primary btn-block btn-lg" style="text-decoration: none;">
-        🚀 Übung starten
-    </a>
-
-    <!-- Quick Actions -->
-    <div class="actions mt-2">
-        <a href="trainer.html?random=1" class="btn btn-secondary" style="text-decoration: none;">
-            🎲 Zufällige Aufgabe
-        </a>
-        <button type="button" class="btn btn-secondary" onclick="showFormulas()">
-            📐 Formeln
+        <button type="button" class="btn btn-primary btn-block btn-lg" id="startBtn" onclick="handleStart()">
+            🚀 Los geht's
         </button>
     </div>
 
-    <!-- Reference Card -->
-    <details class="ref-card">
-        <summary>📋 Betriebsdaten (Zuschlagssätze)</summary>
-        <div class="ref-content">
-            <div class="ref-row">
-                <span>MGK Hörgeräte</span>
-                <span class="val">32,8 %</span>
-            </div>
-            <div class="ref-row">
-                <span>MGK Otoplastik/Material</span>
-                <span class="val">35,4 %</span>
-            </div>
-            <div class="ref-row">
-                <span>MGK Handelswaren</span>
-                <span class="val">108 %</span>
-            </div>
-            <div class="ref-row">
-                <span>Fert. HG-Anpassung</span>
-                <span class="val">60,50 €/Std</span>
-            </div>
-            <div class="ref-row">
-                <span>Fert. Audiometrie</span>
-                <span class="val">63,40 €/Std</span>
-            </div>
-            <div class="ref-row">
-                <span>Fert. Werkstatt/Labor</span>
-                <span class="val">58,90 €/Std</span>
-            </div>
+    <!-- Existing Profiles -->
+    <div class="card" id="profilesCard" style="display: none;">
+        <div class="card-header">
+            <span class="card-title">Vorhandene Profile</span>
         </div>
-    </details>
+        
+        <ul class="profile-list" id="profileList">
+            <!-- Wird per JS gefüllt -->
+        </ul>
+    </div>
 
-    <!-- Reset Stats -->
-    <div class="text-center mt-2">
-        <button type="button" class="btn btn-secondary" onclick="confirmReset()" style="font-size: 0.85rem; padding: 10px 16px;">
-            🗑️ Fortschritt zurücksetzen
+    <!-- Info Card -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">ℹ️ Info</span>
+        </div>
+        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.6;">
+            Übe alle 11 Kalkulationsaufgaben aus Lernfeld 17.2. 
+            Dein Fortschritt wird gespeichert, auch wenn du die App schließt.
+        </p>
+        <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+            <span class="badge">✓ Offline verfügbar</span>
+            <span class="badge">✓ Fortschritt speichern</span>
+            <span class="badge">✓ Zufallsaufgaben</span>
+        </div>
+    </div>
+
+    <!-- Install Prompt -->
+    <div class="card" id="installCard" style="display: none;">
+        <div class="card-header">
+            <span class="card-title">📱 Als App installieren</span>
+        </div>
+        <p class="text-muted mb-2" style="font-size: 0.9rem;">
+            Installiere die App auf deinem Homescreen für schnellen Zugriff!
+        </p>
+        <button type="button" class="btn btn-secondary btn-block" id="installBtn">
+            ⬇️ Installieren
         </button>
     </div>
 
 </div>
 
-<!-- Modal -->
+<!-- Modal für Profil-Konflikt -->
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
         <div class="modal-header">
-            <h3 id="modalTitle">Info</h3>
-            <button type="button" class="modal-close" id="modalClose">×</button>
+            <h3>👤 Profil gefunden</h3>
+            <button type="button" class="modal-close" onclick="closeModal()">×</button>
         </div>
-        <div class="modal-body" id="modalBody">
+        <div class="modal-body">
+            <p class="mb-2">Ein Profil mit diesem Namen existiert bereits:</p>
+            <div class="profile-item" style="cursor: default; margin-bottom: 16px;">
+                <div class="profile-avatar" id="modalAvatar">👤</div>
+                <div class="profile-info">
+                    <div class="profile-name" id="modalName">Name</div>
+                    <div class="profile-stats" id="modalStats">0 Aufgaben gelöst</div>
+                </div>
+            </div>
+            <p class="text-muted">Möchtest du dieses Profil laden oder einen anderen Namen wählen?</p>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-primary" id="modalOk">Verstanden</button>
+        <div class="modal-footer" style="display: flex; gap: 12px;">
+            <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeModal()">
+                Anderen Namen
+            </button>
+            <button type="button" class="btn btn-primary" style="flex: 1;" id="loadProfileBtn">
+                Profil laden
+            </button>
         </div>
     </div>
 </div>
 
-<script src="app.js"></script>
+<!-- Scripts -->
+<script src="./js/profanity.js"></script>
+<script src="./js/profiles.js"></script>
+<script src="./js/generator.js"></script>
 <script>
-// Statistiken laden und anzeigen
-function updateDisplay() {
-    var stats = loadStats();
-    
-    document.getElementById('statSolved').textContent = stats.solvedTasks.length;
-    document.getElementById('statStreak').textContent = stats.bestStreak;
-    document.getElementById('statSessions').textContent = stats.sessions.length;
-    
-    var progress = Math.round((stats.solvedTasks.length / 11) * 100);
-    document.getElementById('progressFill').style.width = progress + '%';
-    document.getElementById('progressText').textContent = stats.solvedTasks.length + ' von 11 Aufgaben gemeistert';
-    
-    // Letzte Session anzeigen
-    if (stats.lastSession) {
-        var lastDate = new Date(stats.lastSession);
-        var now = new Date();
-        var diff = now - lastDate;
-        var diffHours = Math.floor(diff / (1000 * 60 * 60));
-        var diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
-        
-        var timeText;
-        if (diffHours < 1) {
-            timeText = 'Gerade eben';
-        } else if (diffHours < 24) {
-            timeText = 'Vor ' + diffHours + ' Stunde' + (diffHours > 1 ? 'n' : '');
-        } else {
-            timeText = 'Vor ' + diffDays + ' Tag' + (diffDays > 1 ? 'en' : '');
-        }
-        
-        document.getElementById('lastSessionCard').style.display = 'block';
-        document.getElementById('lastSessionText').textContent = timeText;
-    }
+// PWA Service Worker registrieren
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./js/sw.js')
+        .then(reg => console.log('Service Worker registriert'))
+        .catch(err => console.log('SW Fehler:', err));
 }
 
-// Formeln anzeigen
-function showFormulas() {
-    var content = '<div class="formula-card" style="margin:0;">';
-    content += '<div class="formula-list">';
-    content += 'MEK = Listenpreis + Bezugskosten<br>';
-    content += 'MGK = MEK × Zuschlagssatz<br>';
-    content += 'Mges = MEK + MGK<br>';
-    content += 'Fert = (Min ÷ 60) × €/Std<br>';
-    content += 'Sk = Mges + Fertigung<br>';
-    content += 'Gewinn = Sk × %<br>';
-    content += 'NVP = Sk + Gewinn<br>';
-    content += 'BVP = NVP × 1,19';
-    content += '</div></div>';
-    
-    showModal('📐 Formeln', content);
-}
-
-// Fortschritt zurücksetzen
-function confirmReset() {
-    if (confirm('Wirklich alle Statistiken löschen? Das kann nicht rückgängig gemacht werden.')) {
-        resetStats();
-        updateDisplay();
-        alert('Fortschritt wurde zurückgesetzt!');
-    }
-}
-
-// Modal Event Listeners
-document.getElementById('modalOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
+// PWA Install Prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installCard').style.display = 'block';
 });
-document.getElementById('modalClose').addEventListener('click', closeModal);
-document.getElementById('modalOk').addEventListener('click', closeModal);
 
-// Start
-updateDisplay();
+document.getElementById('installBtn')?.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        document.getElementById('installCard').style.display = 'none';
+    }
+});
+
+// Elemente
+const nameInput = document.getElementById('nameInput');
+const nameError = document.getElementById('nameError');
+const errorText = document.getElementById('errorText');
+const profilesCard = document.getElementById('profilesCard');
+const profileList = document.getElementById('profileList');
+
+// Aktives Profil prüfen
+const currentProfile = PROFILES.getCurrent();
+if (currentProfile) {
+    // Direkt zum Home weiterleiten
+    window.location.href = './home.html';
+}
+
+// Vorhandene Profile laden
+function loadProfiles() {
+    const profiles = PROFILES.list();
+    
+    if (profiles.length > 0) {
+        profilesCard.style.display = 'block';
+        profileList.innerHTML = '';
+        
+        profiles.forEach(profile => {
+            const li = document.createElement('li');
+            li.className = 'profile-item';
+            li.onclick = () => loginProfile(profile.name);
+            
+            const avatars = ['👤', '🎓', '📚', '💪', '🎯', '⭐'];
+            const avatar = avatars[profile.name.length % avatars.length];
+            
+            li.innerHTML = `
+                <div class="profile-avatar">${avatar}</div>
+                <div class="profile-info">
+                    <div class="profile-name">${profile.name}</div>
+                    <div class="profile-stats">${profile.solved}/11 gelöst · Streak: ${profile.bestStreak}</div>
+                </div>
+            `;
+            
+            profileList.appendChild(li);
+        });
+    }
+}
+
+// Profil einloggen
+function loginProfile(name) {
+    const result = PROFILES.login(name);
+    if (result.success) {
+        window.location.href = './home.html';
+    }
+}
+
+// Start-Button Handler
+function handleStart() {
+    const name = nameInput.value.trim();
+    
+    // Validierung
+    const validation = PROFANITY.validate(name);
+    if (!validation.valid) {
+        showError(validation.error);
+        return;
+    }
+    
+    // Prüfen ob Name existiert
+    const existingName = PROFILES.exists(name);
+    if (existingName) {
+        showProfileModal(existingName);
+        return;
+    }
+    
+    // Neues Profil erstellen
+    const result = PROFILES.create(name);
+    if (result.success) {
+        window.location.href = './home.html';
+    } else {
+        showError(result.error);
+    }
+}
+
+// Fehler anzeigen
+function showError(message) {
+    nameError.style.display = 'flex';
+    errorText.textContent = message;
+    nameInput.classList.add('error');
+    
+    // Animation
+    nameInput.style.animation = 'none';
+    setTimeout(() => {
+        nameInput.style.animation = 'shake 0.5s ease';
+    }, 10);
+}
+
+// Fehler ausblenden
+function hideError() {
+    nameError.style.display = 'none';
+    nameInput.classList.remove('error');
+}
+
+// Profil-Konflikt Modal anzeigen
+function showProfileModal(name) {
+    const profiles = PROFILES.loadAll();
+    const profile = profiles[name];
+    
+    const avatars = ['👤', '🎓', '📚', '💪', '🎯', '⭐'];
+    document.getElementById('modalAvatar').textContent = avatars[name.length % avatars.length];
+    document.getElementById('modalName').textContent = name;
+    document.getElementById('modalStats').textContent = 
+        `${profile.solvedTasks.length}/11 gelöst · Beste Serie: ${profile.bestStreak}`;
+    
+    document.getElementById('loadProfileBtn').onclick = () => {
+        loginProfile(name);
+    };
+    
+    document.getElementById('modalOverlay').classList.add('show');
+}
+
+// Modal schließen
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+    nameInput.focus();
+    nameInput.select();
+}
+
+// Event Listeners
+nameInput.addEventListener('input', hideError);
+
+nameInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        handleStart();
+    }
+});
+
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modalOverlay') {
+        closeModal();
+    }
+});
+
+// CSS Animation für Shake
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-5px); }
+        40%, 80% { transform: translateX(5px); }
+    }
+`;
+document.head.appendChild(style);
+
+// Init
+loadProfiles();
+nameInput.focus();
 </script>
 
 </body>
 </html>
-
