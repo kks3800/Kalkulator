@@ -2227,9 +2227,9 @@ function skip() {
 }
 
 // ===== INIT =====
-document.getElementById('prevBtn').addEventListener('click', goPrev);
-document.getElementById('nextBtn').addEventListener('click', goNext);
-document.getElementById('skipBtn').addEventListener('click', skip);
+// Note: onclick handlers are set in updateNavButtons() dynamically
+document.getElementById('prevBtn').onclick = goPrev;
+document.getElementById('skipBtn').onclick = skip;
 
 // Check profile
 STORAGE.onReady(async () => {
