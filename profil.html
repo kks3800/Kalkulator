@@ -96,15 +96,15 @@
             <span class="card-title">Aktionen</span>
         </div>
         
-        <button type="button" class="btn btn-secondary btn-block mb-2" onclick="switchProfile()">
+        <button type="button" class="btn btn-secondary btn-block mb-2" id="btnSwitchProfile">
             🔄 Profil wechseln
         </button>
         
-        <button type="button" class="btn btn-secondary btn-block mb-2" onclick="resetProgress()">
+        <button type="button" class="btn btn-secondary btn-block mb-2" id="btnResetProgress">
             📊 Fortschritt zurücksetzen
         </button>
         
-        <button type="button" class="btn btn-danger btn-block" onclick="deleteProfile()">
+        <button type="button" class="btn btn-danger btn-block" id="btnDeleteProfile">
             🗑️ Profil löschen
         </button>
     </div>
@@ -144,7 +144,7 @@
     <div class="modal">
         <div class="modal-header">
             <h3 id="modalTitle">Bestätigen</h3>
-            <button type="button" class="modal-close" onclick="closeModal()">×</button>
+            <button type="button" class="modal-close" id="modalCloseBtn">×</button>
         </div>
         <div class="modal-body" id="modalBody"></div>
         <div class="modal-footer" id="modalFooter"></div>
@@ -152,68 +152,15 @@
 </div>
 
 <!-- Scripts -->
-<script src="./js/storage.js?v=4"></script>
-<script src="./js/profanity.js?v=4"></script>
-<script src="./js/profiles.js?v=4"></script>
-<script src="./js/generator.js?v=4"></script>
+<script src="./js/storage.js?v=5"></script>
+<script src="./js/profanity.js?v=5"></script>
+<script src="./js/profiles.js?v=5"></script>
+<script src="./js/generator.js?v=5"></script>
 <script>
-// Warten auf Storage + Profiles Init
-STORAGE.onReady(async () => {
-await PROFILES.init();
+// Global stats variable
+let stats = null;
 
-// Profil prüfen
-const profile = PROFILES.getCurrent();
-if (!profile) {
-    window.location.href = './index.html';
-    return;
-}
-
-const stats = PROFILES.getStats();
-
-// Avatar
-const avatars = ['👤', '🎓', '📚', '💪', '🎯', '⭐', '🏆', '🚀'];
-document.getElementById('profileAvatar').textContent = avatars[stats.name.length % avatars.length];
-
-// Profilinfo
-document.getElementById('profileName').textContent = stats.name;
-
-const created = new Date(profile.data.created);
-const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-document.getElementById('profileDate').textContent = 'Dabei seit ' + months[created.getMonth()] + ' ' + created.getFullYear();
-
-// Statistiken
-document.getElementById('statSolved').textContent = stats.solved;
-document.getElementById('statAccuracy').textContent = stats.accuracy + '%';
-document.getElementById('statStreak').textContent = stats.bestStreak;
-
-document.getElementById('detailCorrect').textContent = stats.totalCorrect;
-document.getElementById('detailAttempts').textContent = stats.totalAttempts;
-document.getElementById('detailSessions').textContent = stats.sessionsCount;
-document.getElementById('detailCurrentStreak').textContent = stats.currentStreak + ' 🔥';
-
-// Progress
-const progress = Math.round((stats.solved / 11) * 100);
-document.getElementById('progressFill').style.width = progress + '%';
-document.getElementById('progressText').textContent = stats.solved + ' von 11 Aufgaben gemeistert';
-
-// Solved Grid
-const solvedGrid = document.getElementById('solvedGrid');
-GENERATOR.getAllTaskIds().forEach(id => {
-    const div = document.createElement('div');
-    div.className = 'task-btn';
-    div.style.cursor = 'default';
-    div.innerHTML = '<span>' + id + '</span>';
-    
-    if (stats.solvedTasks.includes(id)) {
-        div.classList.add('solved');
-    }
-    
-    solvedGrid.appendChild(div);
-});
-
-document.getElementById('solvedInfo').textContent = stats.solved + ' von 11 Aufgaben gemeistert';
-
-// Modal
+// Modal functions (global)
 function showModal(title, body, footer) {
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalBody').innerHTML = body;
@@ -225,11 +172,7 @@ function closeModal() {
     document.getElementById('modalOverlay').classList.remove('show');
 }
 
-document.getElementById('modalOverlay').addEventListener('click', (e) => {
-    if (e.target.id === 'modalOverlay') closeModal();
-});
-
-// Profil wechseln
+// Action functions (global)
 function switchProfile() {
     showModal(
         '🔄 Profil wechseln',
@@ -243,7 +186,6 @@ async function doSwitchProfile() {
     window.location.href = './index.html';
 }
 
-// Fortschritt zurücksetzen
 function resetProgress() {
     showModal(
         '📊 Fortschritt zurücksetzen',
@@ -264,8 +206,8 @@ async function doResetProgress() {
     window.location.reload();
 }
 
-// Profil löschen
 function deleteProfile() {
+    if (!stats) return;
     showModal(
         '🗑️ Profil löschen',
         '<p class="text-muted">Dein Profil <strong>"' + stats.name + '"</strong> wird vollständig gelöscht.</p><p style="color: var(--danger); margin-top: 12px;">⚠️ Diese Aktion kann nicht rückgängig gemacht werden!</p>',
@@ -274,13 +216,77 @@ function deleteProfile() {
 }
 
 async function doDeleteProfile() {
+    if (!stats) return;
     await PROFILES.remove(stats.name);
     window.location.href = './index.html';
 }
 
-}); // Ende STORAGE.onReady
+// Event Listeners
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modalOverlay') closeModal();
+});
+document.getElementById('btnSwitchProfile').addEventListener('click', switchProfile);
+document.getElementById('btnResetProgress').addEventListener('click', resetProgress);
+document.getElementById('btnDeleteProfile').addEventListener('click', deleteProfile);
+
+// Initialize
+STORAGE.onReady(async () => {
+    await PROFILES.init();
+    
+    // Profil prüfen
+    const profile = PROFILES.getCurrent();
+    if (!profile) {
+        window.location.href = './index.html';
+        return;
+    }
+    
+    stats = PROFILES.getStats();
+    
+    // Avatar
+    const avatars = ['👤', '🎓', '📚', '💪', '🎯', '⭐', '🏆', '🚀'];
+    document.getElementById('profileAvatar').textContent = avatars[stats.name.length % avatars.length];
+    
+    // Profilinfo
+    document.getElementById('profileName').textContent = stats.name;
+    
+    const created = new Date(profile.data.created);
+    const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+    document.getElementById('profileDate').textContent = 'Dabei seit ' + months[created.getMonth()] + ' ' + created.getFullYear();
+    
+    // Statistiken
+    document.getElementById('statSolved').textContent = stats.solved;
+    document.getElementById('statAccuracy').textContent = stats.accuracy + '%';
+    document.getElementById('statStreak').textContent = stats.bestStreak;
+    
+    document.getElementById('detailCorrect').textContent = stats.totalCorrect;
+    document.getElementById('detailAttempts').textContent = stats.totalAttempts;
+    document.getElementById('detailSessions').textContent = stats.sessionsCount;
+    document.getElementById('detailCurrentStreak').textContent = stats.currentStreak + ' 🔥';
+    
+    // Progress
+    const progress = Math.round((stats.solved / 11) * 100);
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('progressText').textContent = stats.solved + ' von 11 Aufgaben gemeistert';
+    
+    // Solved Grid
+    const solvedGrid = document.getElementById('solvedGrid');
+    GENERATOR.getAllTaskIds().forEach(id => {
+        const div = document.createElement('div');
+        div.className = 'task-btn';
+        div.style.cursor = 'default';
+        div.innerHTML = '<span>' + id + '</span>';
+        
+        if (stats.solvedTasks.includes(id)) {
+            div.classList.add('solved');
+        }
+        
+        solvedGrid.appendChild(div);
+    });
+    
+    document.getElementById('solvedInfo').textContent = stats.solved + ' von 11 Aufgaben gemeistert';
+});
 </script>
 
 </body>
 </html>
-
