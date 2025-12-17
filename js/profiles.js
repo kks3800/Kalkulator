@@ -1,125 +1,56 @@
 // ===== PROFIL-SYSTEM =====
-// Verwaltet Benutzerprofile mit localStorage
+// Verwaltet Benutzerprofile mit universellem Storage (Safari iOS kompatibel)
 
 const PROFILES = (function() {
     
     const STORAGE_KEY = 'kalktrainer_profiles';
     const CURRENT_KEY = 'kalktrainer_current';
     
-    // Storage-Verfügbarkeit prüfen
-    let storageAvailable = false;
-    let storageError = null;
+    // Cache für synchrone Operationen
+    let profilesCache = null;
+    let currentCache = null;
+    let initialized = false;
     
-    function checkStorage() {
+    // Initialisierung (lädt Daten in Cache)
+    async function init() {
         try {
-            const test = '__storage_test__';
-            localStorage.setItem(test, test);
-            localStorage.removeItem(test);
-            storageAvailable = true;
-            return true;
+            profilesCache = await STORAGE.get(STORAGE_KEY) || {};
+            currentCache = await STORAGE.get(CURRENT_KEY) || null;
+            initialized = true;
         } catch (e) {
-            storageAvailable = false;
-            if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-                storageError = 'Speicher voll! Bitte Browser-Daten löschen.';
-            } else if (e.name === 'SecurityError') {
-                storageError = 'Speichern blockiert! Bitte privaten Modus deaktivieren.';
-            } else {
-                storageError = 'Speichern nicht möglich. Versuche den Browser zu wechseln oder den privaten Modus zu deaktivieren.';
-            }
-            console.error('Storage nicht verfügbar:', e);
-            return false;
+            console.error('Profiles init error:', e);
+            profilesCache = {};
+            currentCache = null;
+            initialized = true;
         }
     }
     
-    // Initial check
-    checkStorage();
-    
-    // Alle Profile laden
+    // Alle Profile laden (synchron aus Cache)
     function loadAll() {
-        if (!storageAvailable) {
-            // Fallback zu sessionStorage
-            try {
-                const data = sessionStorage.getItem(STORAGE_KEY);
-                if (data) return JSON.parse(data);
-            } catch (e) {}
-            return {};
-        }
-        
-        try {
-            const data = localStorage.getItem(STORAGE_KEY);
-            if (data) {
-                return JSON.parse(data);
-            }
-        } catch (e) {
-            console.error('Fehler beim Laden der Profile:', e);
-        }
-        return {};
+        return profilesCache || {};
     }
     
     // Alle Profile speichern
-    function saveAll(profiles) {
-        const jsonData = JSON.stringify(profiles);
-        
-        // Versuche localStorage
-        try {
-            localStorage.setItem(STORAGE_KEY, jsonData);
-            storageAvailable = true;
-            return { success: true };
-        } catch (e) {
-            console.warn('localStorage fehlgeschlagen, versuche sessionStorage:', e);
-        }
-        
-        // Fallback: sessionStorage (Daten bleiben bis Browser geschlossen wird)
-        try {
-            sessionStorage.setItem(STORAGE_KEY, jsonData);
-            return { 
-                success: true, 
-                warning: 'Daten werden nur bis zum Schließen des Browsers gespeichert (Privater Modus).'
-            };
-        } catch (e2) {
-            console.error('Auch sessionStorage fehlgeschlagen:', e2);
-        }
-        
-        return { 
-            success: false, 
-            error: storageError || 'Speichern nicht möglich. Bitte deaktiviere den privaten Modus oder wechsle den Browser.'
-        };
+    async function saveAll(profiles) {
+        profilesCache = profiles;
+        return await STORAGE.set(STORAGE_KEY, profiles);
     }
     
-    // Storage-Status abfragen
-    function getStorageStatus() {
-        checkStorage();
-        return {
-            available: storageAvailable,
-            error: storageError,
-            type: storageAvailable ? 'localStorage' : 'sessionStorage'
-        };
-    }
-    
-    // Aktuelles Profil laden
+    // Aktuelles Profil aus Cache
     function getCurrent() {
-        try {
-            const name = localStorage.getItem(CURRENT_KEY);
-            if (name) {
-                const profiles = loadAll();
-                if (profiles[name]) {
-                    return { name: name, data: profiles[name] };
-                }
-            }
-        } catch (e) {
-            console.error('Fehler beim Laden des aktuellen Profils:', e);
+        if (!currentCache) return null;
+        
+        const profiles = loadAll();
+        if (profiles[currentCache]) {
+            return { name: currentCache, data: profiles[currentCache] };
         }
         return null;
     }
     
     // Aktuelles Profil setzen
-    function setCurrent(name) {
-        try {
-            localStorage.setItem(CURRENT_KEY, name);
-            return true;
-        } catch (e) {
-            return false;
-        }
+    async function setCurrent(name) {
+        currentCache = name;
+        return await STORAGE.set(CURRENT_KEY, name);
     }
     
     // Pruefen ob Name existiert
@@ -129,14 +60,14 @@ const PROFILES = (function() {
         
         for (const existingName of Object.keys(profiles)) {
             if (existingName.toLowerCase() === normalizedName) {
-                return existingName; // Gibt den exakten Namen zurueck
+                return existingName;
             }
         }
         return false;
     }
     
     // Neues Profil erstellen
-    function create(name) {
+    async function create(name) {
         const validation = PROFANITY.validate(name);
         if (!validation.valid) {
             return { success: false, error: validation.error };
@@ -165,22 +96,22 @@ const PROFILES = (function() {
             sessions: []
         };
         
-        const saveResult = saveAll(profiles);
+        const saveResult = await saveAll(profiles);
         
         if (saveResult.success) {
-            setCurrent(trimmedName);
+            await setCurrent(trimmedName);
             return { 
                 success: true, 
                 name: trimmedName,
-                warning: saveResult.warning // Falls sessionStorage als Fallback
+                warning: saveResult.warning
             };
         }
         
-        return { success: false, error: saveResult.error };
+        return { success: false, error: saveResult.error || 'Speichern fehlgeschlagen.' };
     }
     
     // Profil laden/anmelden
-    function login(name) {
+    async function login(name) {
         const trimmedName = name.trim();
         const existingName = exists(trimmedName);
         
@@ -190,28 +121,27 @@ const PROFILES = (function() {
         
         const profiles = loadAll();
         profiles[existingName].lastActive = new Date().toISOString();
-        saveAll(profiles);
-        setCurrent(existingName);
+        await saveAll(profiles);
+        await setCurrent(existingName);
         
         return { success: true, name: existingName, data: profiles[existingName] };
     }
     
     // Profil-Daten aktualisieren
-    function update(data) {
+    async function update(data) {
         const current = getCurrent();
-        if (!current) {
-            return false;
-        }
+        if (!current) return false;
         
         const profiles = loadAll();
         profiles[current.name] = { ...profiles[current.name], ...data };
         profiles[current.name].lastActive = new Date().toISOString();
         
-        return saveAll(profiles).success;
+        const result = await saveAll(profiles);
+        return result.success;
     }
     
     // Aufgabe als geloest markieren
-    function markSolved(taskId) {
+    async function markSolved(taskId) {
         const current = getCurrent();
         if (!current) return false;
         
@@ -230,11 +160,12 @@ const PROFILES = (function() {
             profile.bestStreak = profile.currentStreak;
         }
         
-        return saveAll(profiles).success;
+        const result = await saveAll(profiles);
+        return result.success;
     }
     
     // Falschen Versuch markieren
-    function markWrong() {
+    async function markWrong() {
         const current = getCurrent();
         if (!current) return false;
         
@@ -244,11 +175,12 @@ const PROFILES = (function() {
         profile.totalAttempts++;
         profile.currentStreak = 0;
         
-        return saveAll(profiles).success;
+        const result = await saveAll(profiles);
+        return result.success;
     }
     
     // Session hinzufuegen
-    function addSession(sessionData) {
+    async function addSession(sessionData) {
         const current = getCurrent();
         if (!current) return false;
         
@@ -260,38 +192,37 @@ const PROFILES = (function() {
             ...sessionData
         });
         
-        // Nur die letzten 20 Sessions behalten
         if (profile.sessions.length > 20) {
             profile.sessions = profile.sessions.slice(-20);
         }
         
-        return saveAll(profiles).success;
+        const result = await saveAll(profiles);
+        return result.success;
     }
     
     // Profil loeschen
-    function remove(name) {
+    async function remove(name) {
         const profiles = loadAll();
         const existingName = exists(name);
         
-        if (!existingName) {
-            return false;
-        }
+        if (!existingName) return false;
         
         delete profiles[existingName];
-        saveAll(profiles);
+        await saveAll(profiles);
         
-        // Wenn aktuelles Profil geloescht wurde
         const current = getCurrent();
         if (current && current.name === existingName) {
-            localStorage.removeItem(CURRENT_KEY);
+            await STORAGE.remove(CURRENT_KEY);
+            currentCache = null;
         }
         
         return true;
     }
     
     // Ausloggen
-    function logout() {
-        localStorage.removeItem(CURRENT_KEY);
+    async function logout() {
+        await STORAGE.remove(CURRENT_KEY);
+        currentCache = null;
     }
     
     // Alle Profile auflisten
@@ -309,9 +240,7 @@ const PROFILES = (function() {
     // Statistiken des aktuellen Profils
     function getStats() {
         const current = getCurrent();
-        if (!current) {
-            return null;
-        }
+        if (!current) return null;
         
         const data = current.data;
         return {
@@ -329,8 +258,14 @@ const PROFILES = (function() {
         };
     }
     
+    // Storage-Status
+    function getStorageStatus() {
+        return STORAGE.getStatus();
+    }
+    
     // Public API
     return {
+        init: init,
         loadAll: loadAll,
         getCurrent: getCurrent,
         exists: exists,
@@ -348,4 +283,3 @@ const PROFILES = (function() {
     };
     
 })();
-

@@ -305,14 +305,20 @@
 </div>
 
 <!-- Scripts -->
+<script src="./js/storage.js"></script>
 <script src="./js/profanity.js"></script>
 <script src="./js/profiles.js"></script>
 <script src="./js/generator.js"></script>
 <script>
+// Warten auf Storage + Profiles Init
+STORAGE.onReady(async () => {
+await PROFILES.init();
+
 // Profil prüfen
 const profile = PROFILES.getCurrent();
 if (!profile) {
     window.location.href = './index.html';
+    return;
 }
 
 // State
@@ -690,6 +696,8 @@ if (params.get('task')) {
 } else if (params.get('random') === '1') {
     loadRandomTask();
 }
+
+}); // Ende STORAGE.onReady
 </script>
 
 </body>

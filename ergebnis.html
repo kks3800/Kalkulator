@@ -119,10 +119,15 @@
 </nav>
 
 <!-- Scripts -->
+<script src="./js/storage.js"></script>
 <script src="./js/profanity.js"></script>
 <script src="./js/profiles.js"></script>
 <script src="./js/generator.js"></script>
 <script>
+// Warten auf Storage + Profiles Init
+STORAGE.onReady(async () => {
+await PROFILES.init();
+
 // Session-Daten laden
 let session = null;
 try {
@@ -273,6 +278,8 @@ if (percentage === 100 && totalCount > 0) {
         setTimeout(() => confetti.remove(), 5000);
     }
 }
+
+}); // Ende STORAGE.onReady
 </script>
 
 </body>

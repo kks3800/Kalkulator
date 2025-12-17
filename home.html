@@ -156,18 +156,24 @@
 </nav>
 
 <!-- Scripts -->
+<script src="./js/storage.js"></script>
 <script src="./js/profanity.js"></script>
 <script src="./js/profiles.js"></script>
 <script src="./js/generator.js"></script>
 <script>
-// Profil prüfen
-const profile = PROFILES.getCurrent();
-if (!profile) {
-    window.location.href = './index.html';
-}
+// Warten auf Storage + Profiles Init
+STORAGE.onReady(async () => {
+    await PROFILES.init();
+    
+    // Profil prüfen
+    const profile = PROFILES.getCurrent();
+    if (!profile) {
+        window.location.href = './index.html';
+        return;
+    }
 
-// Stats laden
-const stats = PROFILES.getStats();
+    // Stats laden
+    const stats = PROFILES.getStats();
 
 // Willkommen
 document.getElementById('welcomeTitle').textContent = `Hallo, ${stats.name}!`;
@@ -206,6 +212,8 @@ randomBtn.href = './trainer.html?random=1';
 randomBtn.className = 'task-btn random';
 randomBtn.innerHTML = '<span>🎲</span>';
 taskGrid.appendChild(randomBtn);
+
+}); // Ende STORAGE.onReady
 </script>
 
 </body>

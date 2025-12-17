@@ -18,13 +18,30 @@
 <!-- Animated Background -->
 <div class="bg-particles"></div>
 
-<div class="container">
+<!-- Loading Screen -->
+<div id="loadingScreen" style="position: fixed; inset: 0; background: var(--bg-dark); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    <div style="text-align: center;">
+        <div style="font-size: 3rem; animation: pulse 1s infinite;">📊</div>
+        <p style="color: var(--text-muted); margin-top: 16px;">Wird geladen...</p>
+    </div>
+</div>
+
+<div class="container" id="mainContainer" style="display: none;">
 
     <!-- Header -->
     <div class="header">
         <div class="header-icon">📊</div>
         <h1>Kalkulations-Trainer</h1>
         <p>Lernfeld 17.2 · Hörakustik</p>
+    </div>
+
+    <!-- Storage Warning -->
+    <div class="card" id="storageWarning" style="display: none; background: linear-gradient(135deg, rgba(255,165,0,0.2), rgba(255,165,0,0.1)); border-color: var(--warning);">
+        <div class="card-header">
+            <span class="card-title" style="color: var(--warning);">⚠️ Speicher-Hinweis</span>
+        </div>
+        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.6;" id="storageWarningText">
+        </p>
     </div>
 
     <!-- Login Card -->
@@ -54,7 +71,7 @@
             </div>
         </div>
 
-        <button type="button" class="btn btn-primary btn-block btn-lg" id="startBtn" onclick="handleStart()">
+        <button type="button" class="btn btn-primary btn-block btn-lg" id="startBtn">
             🚀 Los geht's
         </button>
     </div>
@@ -66,7 +83,6 @@
         </div>
         
         <ul class="profile-list" id="profileList">
-            <!-- Wird per JS gefüllt -->
         </ul>
     </div>
 
@@ -80,8 +96,7 @@
             Dein Fortschritt wird gespeichert, auch wenn du die App schließt.
         </p>
         <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
-            <span class="badge">✓ Offline verfügbar</span>
-            <span class="badge">✓ Fortschritt speichern</span>
+            <span class="badge" id="storageBadge">✓ Speichern möglich</span>
             <span class="badge">✓ Zufallsaufgaben</span>
         </div>
     </div>
@@ -106,7 +121,7 @@
     <div class="modal">
         <div class="modal-header">
             <h3>👤 Profil gefunden</h3>
-            <button type="button" class="modal-close" onclick="closeModal()">×</button>
+            <button type="button" class="modal-close" id="modalCloseBtn">×</button>
         </div>
         <div class="modal-body">
             <p class="mb-2">Ein Profil mit diesem Namen existiert bereits:</p>
@@ -120,7 +135,7 @@
             <p class="text-muted">Möchtest du dieses Profil laden oder einen anderen Namen wählen?</p>
         </div>
         <div class="modal-footer" style="display: flex; gap: 12px;">
-            <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeModal()">
+            <button type="button" class="btn btn-secondary" style="flex: 1;" id="modalCancelBtn">
                 Anderen Namen
             </button>
             <button type="button" class="btn btn-primary" style="flex: 1;" id="loadProfileBtn">
@@ -130,15 +145,18 @@
     </div>
 </div>
 
-<!-- Scripts -->
+<!-- Scripts - storage.js MUST come before profiles.js -->
+<script src="./js/storage.js"></script>
 <script src="./js/profanity.js"></script>
 <script src="./js/profiles.js"></script>
 <script src="./js/generator.js"></script>
 <script>
-// PWA Service Worker registrieren
+// ===== APP INITIALIZATION =====
+
+// PWA Service Worker
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./js/sw.js')
-        .then(reg => console.log('Service Worker registriert'))
+        .then(reg => console.log('SW registriert'))
         .catch(err => console.log('SW Fehler:', err));
 }
 
@@ -153,28 +171,87 @@ window.addEventListener('beforeinstallprompt', (e) => {
 document.getElementById('installBtn')?.addEventListener('click', async () => {
     if (deferredPrompt) {
         deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
+        await deferredPrompt.userChoice;
         deferredPrompt = null;
         document.getElementById('installCard').style.display = 'none';
     }
 });
 
-// Elemente
+// CSS Animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-5px); }
+        40%, 80% { transform: translateX(5px); }
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+`;
+document.head.appendChild(style);
+
+// ===== MAIN APP =====
+
+// DOM Elements
 const nameInput = document.getElementById('nameInput');
 const nameError = document.getElementById('nameError');
 const errorText = document.getElementById('errorText');
 const profilesCard = document.getElementById('profilesCard');
 const profileList = document.getElementById('profileList');
+const loadingScreen = document.getElementById('loadingScreen');
+const mainContainer = document.getElementById('mainContainer');
+const storageWarning = document.getElementById('storageWarning');
+const storageBadge = document.getElementById('storageBadge');
 
-// Aktives Profil prüfen
-const currentProfile = PROFILES.getCurrent();
-if (currentProfile) {
-    // Direkt zum Home weiterleiten
-    window.location.href = './home.html';
+// Show error
+function showError(message) {
+    nameError.style.display = 'flex';
+    errorText.textContent = message;
+    nameInput.classList.add('error');
+    nameInput.style.animation = 'none';
+    setTimeout(() => { nameInput.style.animation = 'shake 0.5s ease'; }, 10);
 }
 
-// Vorhandene Profile laden
-function loadProfiles() {
+// Hide error
+function hideError() {
+    nameError.style.display = 'none';
+    nameInput.classList.remove('error');
+}
+
+// Close modal
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+    nameInput.focus();
+    nameInput.select();
+}
+
+// Show profile modal
+function showProfileModal(name) {
+    const profiles = PROFILES.loadAll();
+    const profile = profiles[name];
+    
+    const avatars = ['👤', '🎓', '📚', '💪', '🎯', '⭐'];
+    document.getElementById('modalAvatar').textContent = avatars[name.length % avatars.length];
+    document.getElementById('modalName').textContent = name;
+    document.getElementById('modalStats').textContent = 
+        `${profile.solvedTasks.length}/11 gelöst · Beste Serie: ${profile.bestStreak}`;
+    
+    document.getElementById('loadProfileBtn').onclick = () => loginProfile(name);
+    document.getElementById('modalOverlay').classList.add('show');
+}
+
+// Login profile
+async function loginProfile(name) {
+    const result = await PROFILES.login(name);
+    if (result.success) {
+        window.location.href = './home.html';
+    }
+}
+
+// Load profiles list
+function loadProfilesList() {
     const profiles = PROFILES.list();
     
     if (profiles.length > 0) {
@@ -202,36 +279,27 @@ function loadProfiles() {
     }
 }
 
-// Profil einloggen
-function loginProfile(name) {
-    const result = PROFILES.login(name);
-    if (result.success) {
-        window.location.href = './home.html';
-    }
-}
-
-// Start-Button Handler
-function handleStart() {
+// Start button handler
+async function handleStart() {
     const name = nameInput.value.trim();
     
-    // Validierung
+    // Validation
     const validation = PROFANITY.validate(name);
     if (!validation.valid) {
         showError(validation.error);
         return;
     }
     
-    // Prüfen ob Name existiert
+    // Check if name exists
     const existingName = PROFILES.exists(name);
     if (existingName) {
         showProfileModal(existingName);
         return;
     }
     
-    // Neues Profil erstellen
-    const result = PROFILES.create(name);
+    // Create new profile
+    const result = await PROFILES.create(name);
     if (result.success) {
-        // Warnung anzeigen wenn nur sessionStorage (privater Modus)
         if (result.warning) {
             alert('⚠️ ' + result.warning);
         }
@@ -241,103 +309,82 @@ function handleStart() {
     }
 }
 
-// Storage-Status beim Start prüfen
-const storageStatus = PROFILES.getStorageStatus();
-if (!storageStatus.available) {
-    // Warnung anzeigen dass Storage eingeschränkt ist
-    const warningDiv = document.createElement('div');
-    warningDiv.className = 'card';
-    warningDiv.style.background = 'linear-gradient(135deg, rgba(255,71,87,0.2), rgba(255,71,87,0.1))';
-    warningDiv.style.borderColor = 'var(--danger)';
-    warningDiv.innerHTML = `
-        <div class="card-header">
-            <span class="card-title" style="color: var(--danger);">⚠️ Eingeschränkter Modus</span>
-        </div>
-        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.6;">
-            <strong>Speichern ist eingeschränkt.</strong><br><br>
-            Mögliche Ursachen:<br>
-            • Privater/Inkognito Modus aktiv<br>
-            • In-App Browser (WhatsApp, Instagram)<br>
-            • Cookies blockiert<br><br>
-            <strong>Lösung:</strong> Öffne die Seite in Safari/Chrome (nicht im privaten Modus).
-        </p>
-    `;
-    document.querySelector('.container').insertBefore(warningDiv, document.getElementById('loginCard'));
-}
-
-// Fehler anzeigen
-function showError(message) {
-    nameError.style.display = 'flex';
-    errorText.textContent = message;
-    nameInput.classList.add('error');
-    
-    // Animation
-    nameInput.style.animation = 'none';
-    setTimeout(() => {
-        nameInput.style.animation = 'shake 0.5s ease';
-    }, 10);
-}
-
-// Fehler ausblenden
-function hideError() {
-    nameError.style.display = 'none';
-    nameInput.classList.remove('error');
-}
-
-// Profil-Konflikt Modal anzeigen
-function showProfileModal(name) {
-    const profiles = PROFILES.loadAll();
-    const profile = profiles[name];
-    
-    const avatars = ['👤', '🎓', '📚', '💪', '🎯', '⭐'];
-    document.getElementById('modalAvatar').textContent = avatars[name.length % avatars.length];
-    document.getElementById('modalName').textContent = name;
-    document.getElementById('modalStats').textContent = 
-        `${profile.solvedTasks.length}/11 gelöst · Beste Serie: ${profile.bestStreak}`;
-    
-    document.getElementById('loadProfileBtn').onclick = () => {
-        loginProfile(name);
-    };
-    
-    document.getElementById('modalOverlay').classList.add('show');
-}
-
-// Modal schließen
-function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('show');
-    nameInput.focus();
-    nameInput.select();
-}
-
 // Event Listeners
 nameInput.addEventListener('input', hideError);
-
 nameInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        handleStart();
-    }
+    if (e.key === 'Enter') handleStart();
 });
-
+document.getElementById('startBtn').addEventListener('click', handleStart);
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
 document.getElementById('modalOverlay').addEventListener('click', (e) => {
-    if (e.target.id === 'modalOverlay') {
-        closeModal();
-    }
+    if (e.target.id === 'modalOverlay') closeModal();
 });
 
-// CSS Animation für Shake
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        20%, 60% { transform: translateX(-5px); }
-        40%, 80% { transform: translateX(5px); }
-    }
-`;
-document.head.appendChild(style);
+// ===== INITIALIZE APP =====
+async function initApp() {
+    console.log('🚀 Initialisiere App...');
+    
+    // Wait for storage to be ready
+    STORAGE.onReady(async () => {
+        console.log('📦 Storage bereit:', STORAGE.getType());
+        
+        // Initialize profiles
+        await PROFILES.init();
+        
+        // Check storage status
+        const status = STORAGE.getStatus();
+        console.log('📊 Storage Status:', status);
+        
+        // Show warning if not persistent
+        if (!status.persistent) {
+            storageWarning.style.display = 'block';
+            storageBadge.textContent = '⚠️ Temporär';
+            storageBadge.style.background = 'var(--warning)';
+            storageBadge.style.color = 'var(--bg-dark)';
+            
+            if (status.type === 'sessionStorage') {
+                document.getElementById('storageWarningText').innerHTML = 
+                    '<strong>Daten werden nur temporär gespeichert.</strong><br><br>' +
+                    'Dein Fortschritt geht verloren wenn du den Browser schließt.<br><br>' +
+                    '<strong>Für dauerhafte Speicherung:</strong><br>' +
+                    '• Öffne in Safari (nicht im privaten Modus)<br>' +
+                    '• Einstellungen → Safari → "Alle Cookies blockieren" deaktivieren';
+            } else if (status.type === 'memory') {
+                document.getElementById('storageWarningText').innerHTML = 
+                    '<strong>Speichern nicht möglich!</strong><br><br>' +
+                    'Dein Browser blockiert alle Speichermethoden.<br><br>' +
+                    '<strong>Bitte versuche:</strong><br>' +
+                    '• Safari/Chrome öffnen (nicht WhatsApp/Instagram)<br>' +
+                    '• Privaten Modus deaktivieren<br>' +
+                    '• Cookies erlauben';
+            }
+        } else if (status.type === 'indexedDB') {
+            storageBadge.textContent = '✓ IndexedDB';
+        }
+        
+        // Check for existing session
+        const currentProfile = PROFILES.getCurrent();
+        if (currentProfile) {
+            console.log('👤 Aktives Profil gefunden:', currentProfile.name);
+            window.location.href = './home.html';
+            return;
+        }
+        
+        // Load profiles list
+        loadProfilesList();
+        
+        // Hide loading, show main
+        loadingScreen.style.display = 'none';
+        mainContainer.style.display = 'block';
+        nameInput.focus();
+        
+        console.log('✅ App bereit!');
+    });
+}
 
-// Init
-loadProfiles();
-nameInput.focus();
+// Start the app
+initApp();
 </script>
 
 </body>

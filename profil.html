@@ -152,14 +152,20 @@
 </div>
 
 <!-- Scripts -->
+<script src="./js/storage.js"></script>
 <script src="./js/profanity.js"></script>
 <script src="./js/profiles.js"></script>
 <script src="./js/generator.js"></script>
 <script>
+// Warten auf Storage + Profiles Init
+STORAGE.onReady(async () => {
+await PROFILES.init();
+
 // Profil prüfen
 const profile = PROFILES.getCurrent();
 if (!profile) {
     window.location.href = './index.html';
+    return;
 }
 
 const stats = PROFILES.getStats();
@@ -232,8 +238,8 @@ function switchProfile() {
     );
 }
 
-function doSwitchProfile() {
-    PROFILES.logout();
+async function doSwitchProfile() {
+    await PROFILES.logout();
     window.location.href = './index.html';
 }
 
@@ -246,8 +252,8 @@ function resetProgress() {
     );
 }
 
-function doResetProgress() {
-    PROFILES.update({
+async function doResetProgress() {
+    await PROFILES.update({
         solvedTasks: [],
         totalCorrect: 0,
         totalAttempts: 0,
@@ -267,10 +273,12 @@ function deleteProfile() {
     );
 }
 
-function doDeleteProfile() {
-    PROFILES.remove(stats.name);
+async function doDeleteProfile() {
+    await PROFILES.remove(stats.name);
     window.location.href = './index.html';
 }
+
+}); // Ende STORAGE.onReady
 </script>
 
 </body>
