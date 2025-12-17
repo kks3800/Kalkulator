@@ -8,6 +8,413 @@
     <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
     <link rel="manifest" href="./manifest.json">
     <link rel="stylesheet" href="./css/style.css">
+    <style>
+        /* Kurs-spezifische Styles */
+        .chapter-header {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .chapter-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chapter-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            background: var(--accent);
+            color: var(--bg-dark);
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .chapter-badge.theory { background: #8b5cf6; color: white; }
+        .chapter-badge.exercise { background: var(--accent); }
+        .chapter-badge.quiz { background: var(--warning); color: var(--bg-dark); }
+        .chapter-badge.result { background: var(--success); color: white; }
+        
+        .progress-compact {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .progress-bar-mini {
+            flex: 1;
+            height: 8px;
+            background: var(--glass-bg);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar-mini .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        
+        .content-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .content-card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+        .content-card p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+        
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        .info-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .info-table td:first-child {
+            color: var(--text-muted);
+        }
+        .info-table td:last-child {
+            text-align: right;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .info-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .formula-box {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            color: var(--accent);
+            line-height: 1.8;
+            margin: 16px 0;
+        }
+        
+        .example-box {
+            background: linear-gradient(135deg, rgba(0, 245, 212, 0.1), rgba(0, 204, 136, 0.05));
+            border: 1px solid var(--accent);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin: 16px 0;
+        }
+        .example-box h4 {
+            color: var(--accent);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .task-text {
+            background: var(--glass-bg);
+            border-left: 4px solid var(--accent);
+            padding: 16px;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            margin-bottom: 20px;
+            line-height: 1.7;
+            color: var(--text-primary);
+        }
+        
+        .calc-section {
+            background: var(--glass-bg);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin: 16px 0;
+        }
+        .calc-section h4 {
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+        .calc-row-simple {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .calc-row-simple label {
+            flex: 1;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .calc-row-simple input {
+            width: 100px;
+            padding: 10px;
+            background: var(--bg-dark);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: right;
+        }
+        .calc-row-simple input:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+        .calc-row-simple .unit {
+            color: var(--text-muted);
+            width: 30px;
+        }
+        .calc-row-simple.readonly input {
+            background: transparent;
+            border-color: transparent;
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .calc-result-box {
+            background: linear-gradient(135deg, rgba(0, 245, 212, 0.15), rgba(0, 204, 136, 0.1));
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+            margin-top: 16px;
+        }
+        .calc-result-box .label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+        .calc-result-box .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        /* Quiz Styles */
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .quiz-option:hover {
+            border-color: var(--accent);
+        }
+        .quiz-option.selected {
+            border-color: var(--accent);
+            background: rgba(0, 245, 212, 0.1);
+        }
+        .quiz-option.correct {
+            border-color: var(--success);
+            background: rgba(0, 204, 136, 0.2);
+        }
+        .quiz-option.wrong {
+            border-color: var(--danger);
+            background: rgba(255, 82, 82, 0.2);
+        }
+        .quiz-option .radio {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .quiz-option.selected .radio {
+            border-color: var(--accent);
+            background: var(--accent);
+        }
+        .quiz-option.selected .radio::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--bg-dark);
+            border-radius: 50%;
+        }
+        
+        /* Drag & Drop */
+        .drag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 16px;
+            background: var(--glass-bg);
+            border-radius: var(--radius-sm);
+            min-height: 60px;
+            margin-bottom: 12px;
+        }
+        .drag-item {
+            padding: 10px 16px;
+            background: var(--accent);
+            color: var(--bg-dark);
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        .drag-item:active {
+            cursor: grabbing;
+        }
+        .drop-zone {
+            display: flex;
+            gap: 8px;
+            padding: 16px;
+            background: var(--bg-dark);
+            border: 2px dashed var(--glass-border);
+            border-radius: var(--radius-sm);
+            min-height: 60px;
+            flex-wrap: wrap;
+        }
+        .drop-zone.correct {
+            border-color: var(--success);
+            background: rgba(0, 204, 136, 0.1);
+        }
+        .drop-zone.wrong {
+            border-color: var(--danger);
+            background: rgba(255, 82, 82, 0.1);
+        }
+        
+        /* Fill in the blank */
+        .fill-blank {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .fill-blank input {
+            width: 80px;
+            padding: 8px;
+            background: var(--bg-dark);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .fill-blank input:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+        .fill-blank input.correct {
+            border-color: var(--success);
+            background: rgba(0, 204, 136, 0.2);
+        }
+        .fill-blank input.wrong {
+            border-color: var(--danger);
+            background: rgba(255, 82, 82, 0.2);
+        }
+        
+        /* Navigation */
+        .nav-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .nav-buttons.single {
+            grid-template-columns: 1fr;
+        }
+        
+        /* Results */
+        .result-hero {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, rgba(0, 204, 136, 0.2), rgba(0, 245, 212, 0.1));
+            border: 2px solid var(--success);
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+        }
+        .result-hero .icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+        .result-hero h2 {
+            color: var(--success);
+            margin-bottom: 8px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .stat-item {
+            background: var(--glass-bg);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-item .number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .stat-item .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        /* Hint button */
+        .hint-btn {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            min-height: 44px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(0, 245, 212, 0.3);
+        }
+        .hint-btn:hover, .hint-btn:active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg-dark);
+        }
+        
+        .hint-box {
+            display: none;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(99, 102, 241, 0.1));
+            border: 1px solid #8b5cf6;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .hint-box.show {
+            display: block;
+        }
+        .hint-box h4 {
+            color: #a78bfa;
+            margin-bottom: 8px;
+        }
+    </style>
 </head>
 <body>
 
@@ -16,42 +423,32 @@
 
 <div class="container">
 
-    <!-- Header -->
-    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
-        <a href="./home.html" class="btn btn-secondary" style="padding: 12px; border-radius: 50%;" id="backBtn">
-            <svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        </a>
-        <div style="flex: 1;">
-            <h1 style="font-size: 1.25rem; margin-bottom: 2px;">Geführter Kurs</h1>
-            <p class="text-muted" style="font-size: 0.85rem;" id="courseSubtitle">Lerne Schritt für Schritt</p>
+    <!-- Chapter Header with Progress -->
+    <div class="chapter-header">
+        <div class="chapter-title">
+            <span id="chapterTitle">Kapitel 1: Einführung</span>
+            <span class="chapter-badge theory" id="chapterBadge">Theorie</span>
         </div>
-        <span class="badge" id="progressBadge">0/12</span>
-    </div>
-
-    <!-- Course Progress -->
-    <div class="card">
-        <div class="card-header">
-            <span class="card-title">Dein Fortschritt</span>
-        </div>
-        <div class="course-progress" id="courseProgress">
-            <!-- Filled by JS -->
+        <div class="progress-compact">
+            <div class="progress-bar-mini">
+                <div class="fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <span class="progress-text" id="progressText">1 / 12</span>
         </div>
     </div>
 
-    <!-- Current Step Content -->
-    <div id="stepContent">
-        <!-- Filled by JS -->
+    <!-- Content Area (filled by JS) -->
+    <div id="contentArea">
+        <!-- Dynamic content -->
     </div>
 
     <!-- Navigation Buttons -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;" id="navButtons">
+    <div class="nav-buttons" id="navButtons">
         <button type="button" class="btn btn-secondary" id="prevBtn" disabled>
-            <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-            Zurück
+            ← Zurück
         </button>
         <button type="button" class="btn btn-primary" id="nextBtn">
-            Weiter
-            <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            Weiter →
         </button>
     </div>
 
@@ -59,14 +456,6 @@
 
 <!-- Bottom Navigation -->
 <nav class="bottom-nav">
-    <a href="./home.html" class="nav-item">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        <span>Home</span>
-    </a>
-    <a href="./trainer.html" class="nav-item">
-        <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="10" x2="8" y2="10"></line><line x1="12" y1="10" x2="12" y2="10"></line><line x1="16" y1="10" x2="16" y2="10"></line><line x1="8" y1="14" x2="8" y2="14"></line><line x1="12" y1="14" x2="12" y2="14"></line><line x1="16" y1="14" x2="16" y2="14"></line><line x1="8" y1="18" x2="8" y2="18"></line></svg>
-        <span>Üben</span>
-    </a>
     <a href="./kurs.html" class="nav-item active">
         <svg class="icon" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
         <span>Kurs</span>
@@ -77,359 +466,1076 @@
     </a>
 </nav>
 
+<!-- Hint Modal -->
+<div class="modal-overlay" id="hintModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="hintTitle">💡 Tipp</h3>
+            <button type="button" class="modal-close" onclick="closeHint()">×</button>
+        </div>
+        <div class="modal-body" id="hintBody"></div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary btn-block" onclick="closeHint()">Verstanden</button>
+        </div>
+    </div>
+</div>
+
 <!-- Scripts -->
-<script src="./js/storage.js?v=6"></script>
-<script src="./js/profanity.js?v=6"></script>
-<script src="./js/profiles.js?v=6"></script>
-<script src="./js/generator.js?v=6"></script>
-<script src="./js/icons.js?v=6"></script>
+<script src="./js/storage.js?v=7"></script>
+<script src="./js/profanity.js?v=7"></script>
+<script src="./js/profiles.js?v=7"></script>
+<script src="./js/generator.js?v=7"></script>
 <script>
-// Course Steps
-const COURSE_STEPS = [
+// ===== KURS DATEN =====
+const CHAPTERS = [
+    // Kapitel 1: Einführung
     {
-        type: 'intro',
-        title: 'Willkommen zum Kurs!',
+        id: 1,
+        title: "Einführung",
+        type: "theory",
+        badge: "Theorie",
         content: `
-            <div class="course-card">
-                <div style="font-size: 4rem; margin-bottom: 16px;">
-                    <svg class="icon icon-2xl" style="color: var(--accent);" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
-                </div>
-                <h2>Kalkulations-Kurs</h2>
-                <p>In diesem Kurs lernst du Schritt für Schritt alle 11 Kalkulationsaufgaben.</p>
-            </div>
-            <div class="explanation-card">
-                <h4><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg> Was du lernen wirst</h4>
-                <ul>
-                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Vorwärtskalkulation (MEK → BVP)</li>
-                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Rückwärtskalkulation (BVP → MEK)</li>
-                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Rabatt- und Skonto-Berechnungen</li>
-                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> GKV-Zuzahlungen berechnen</li>
-                </ul>
-            </div>
-        `
-    },
-    {
-        type: 'theory',
-        title: 'Grundlagen: Das Kalkulationsschema',
-        content: `
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Das Schema</span>
-                </div>
-                <div style="font-family: monospace; font-size: 0.9rem; line-height: 2; color: var(--text-secondary);">
-                    <div style="display: flex; justify-content: space-between;"><span>Listenpreis / Einkauf</span><span class="text-muted">→ MEK</span></div>
-                    <div style="display: flex; justify-content: space-between;"><span>+ Bezugskosten (Porto)</span></div>
-                    <div style="display: flex; justify-content: space-between; color: var(--accent);"><strong>= Materialeinzelkosten (MEK)</strong></div>
-                    <div style="display: flex; justify-content: space-between;"><span>+ Materialgemeinkosten (MGK)</span><span class="text-muted">%</span></div>
-                    <div style="display: flex; justify-content: space-between; color: var(--accent);"><strong>= Materialgesamtkosten (Mges)</strong></div>
-                    <div style="display: flex; justify-content: space-between;"><span>+ Fertigungskosten</span><span class="text-muted">Min × €/h</span></div>
-                    <div style="display: flex; justify-content: space-between; color: var(--success);"><strong>= Selbstkosten (Sk)</strong></div>
-                    <div style="display: flex; justify-content: space-between;"><span>+ Gewinn</span><span class="text-muted">%</span></div>
-                    <div style="display: flex; justify-content: space-between; color: var(--success);"><strong>= Nettoverkaufspreis (NVP)</strong></div>
-                    <div style="display: flex; justify-content: space-between;"><span>+ MwSt (19%)</span></div>
-                    <div style="display: flex; justify-content: space-between; color: var(--warning);"><strong>= Bruttoverkaufspreis (BVP)</strong></div>
-                </div>
-            </div>
-            <div class="explanation-card">
-                <h4><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Wichtig zu merken</h4>
-                <ul>
-                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Porto ZUERST zu MEK, DANN MGK-Zuschlag</li>
-                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Fertigungskosten: Minuten ÷ 60 × Stundensatz</li>
-                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> BVP = NVP × 1,19</li>
-                </ul>
-            </div>
-        `
-    },
-    {
-        type: 'theory',
-        title: 'Die MGK-Zuschlagssätze',
-        content: `
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Zuschlagssätze merken!</span>
-                </div>
-                <div style="display: grid; gap: 12px;">
-                    <div style="display: flex; justify-content: space-between; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm); border-left: 4px solid var(--accent);">
-                        <span>Hörgeräte</span>
-                        <span class="text-accent" style="font-weight: 700; font-size: 1.2rem;">32,8 %</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm); border-left: 4px solid var(--success);">
-                        <span>Otoplastik / Material</span>
-                        <span class="text-success" style="font-weight: 700; font-size: 1.2rem;">35,4 %</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm); border-left: 4px solid var(--warning);">
-                        <span>Handelswaren</span>
-                        <span class="text-warning" style="font-weight: 700; font-size: 1.2rem;">108 %</span>
-                    </div>
-                </div>
-            </div>
-            <div class="explanation-card">
-                <h4><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Achtung: Handelswaren!</h4>
-                <p style="color: var(--text-secondary);">
-                    Wecksysteme, Batterien und andere Zubehörteile sind <strong style="color: var(--warning);">Handelswaren</strong> mit 108% MGK!
+            <div class="content-card">
+                <h2>Was ist Kalkulation?</h2>
+                <p>
+                    Die <strong>Kalkulation</strong> ist die Berechnung des Verkaufspreises für ein Produkt oder eine Dienstleistung.
                 </p>
+                <p>
+                    Du startest beim <strong>Einkaufspreis</strong> und rechnest Schritt für Schritt alle Kosten und Zuschläge dazu, bis du beim <strong>Bruttoverkaufspreis (BVP)</strong> landest.
+                </p>
+                
+                <div class="example-box">
+                    <h4>📋 Das Kalkulationsschema</h4>
+                    <div class="formula-box">
+Listenpreis / Einkauf<br>
++ Bezugskosten (Porto)<br>
+<strong style="color: var(--accent);">= MEK (Materialeinzelkosten)</strong><br>
++ MGK (Materialgemeinkosten)<br>
+<strong style="color: var(--accent);">= Mges (Materialgesamtkosten)</strong><br>
++ Fertigungskosten<br>
+<strong style="color: var(--success);">= Sk (Selbstkosten)</strong><br>
++ Gewinn<br>
+<strong style="color: var(--success);">= NVP (Nettoverkaufspreis)</strong><br>
++ MwSt (19%)<br>
+<strong style="color: var(--warning);">= BVP (Bruttoverkaufspreis)</strong>
+                    </div>
+                </div>
             </div>
         `
     },
+    
+    // Kapitel 2: Die Zuschläge
     {
-        type: 'theory',
-        title: 'Die Fertigungsstundensätze',
+        id: 2,
+        title: "Die Zuschläge",
+        type: "theory",
+        badge: "Theorie",
         content: `
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Stundensätze</span>
-                </div>
-                <div style="display: grid; gap: 12px;">
-                    <div style="display: flex; justify-content: space-between; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm);">
-                        <span>HG-Anpassung</span>
-                        <span class="text-accent" style="font-weight: 700;">60,50 €/h</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm);">
-                        <span>Audiometrie</span>
-                        <span class="text-accent" style="font-weight: 700;">63,40 €/h</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm);">
-                        <span>Werkstatt / Labor</span>
-                        <span class="text-accent" style="font-weight: 700;">58,90 €/h</span>
-                    </div>
+            <div class="content-card">
+                <h2>MGK-Zuschlagssätze</h2>
+                <p>
+                    Die <strong>Materialgemeinkosten (MGK)</strong> decken Kosten ab, die nicht direkt einem Produkt zugeordnet werden können (z.B. Lager, Verwaltung).
+                </p>
+                <p>
+                    Je nach Produktart gibt es unterschiedliche Zuschlagssätze:
+                </p>
+                
+                <table class="info-table">
+                    <tr>
+                        <td>🔊 Hörgeräte</td>
+                        <td style="color: var(--accent);">32,8 %</td>
+                    </tr>
+                    <tr>
+                        <td>👂 Otoplastik / Material</td>
+                        <td style="color: var(--success);">35,4 %</td>
+                    </tr>
+                    <tr>
+                        <td>⏰ Handelswaren (Wecker, Batterien)</td>
+                        <td style="color: var(--warning);">108 %</td>
+                    </tr>
+                </table>
+                
+                <div class="example-box">
+                    <h4>⚠️ Wichtig zu merken</h4>
+                    <p style="color: var(--text-secondary); margin: 0;">
+                        <strong>Handelswaren</strong> wie Wecksysteme, Batterien, Pflegeprodukte haben den höchsten MGK-Satz von <strong style="color: var(--warning);">108%</strong>!
+                    </p>
                 </div>
             </div>
-            <div class="explanation-card">
-                <h4><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg> Formel</h4>
-                <p style="color: var(--text-secondary); font-family: monospace; font-size: 1.1rem; text-align: center; padding: 16px;">
+            
+            <div class="content-card">
+                <h2>Fertigungsstundensätze</h2>
+                <p>Die Fertigungskosten werden nach Arbeitszeit berechnet:</p>
+                
+                <table class="info-table">
+                    <tr>
+                        <td>HG-Anpassung</td>
+                        <td>60,50 €/h</td>
+                    </tr>
+                    <tr>
+                        <td>Audiometrie</td>
+                        <td>63,40 €/h</td>
+                    </tr>
+                    <tr>
+                        <td>Werkstatt / Labor</td>
+                        <td>58,90 €/h</td>
+                    </tr>
+                </table>
+                
+                <div class="formula-box">
+                    <strong>Formel:</strong><br>
                     Fertigungskosten = (Minuten ÷ 60) × Stundensatz
-                </p>
+                </div>
             </div>
         `
     },
+    
+    // Kapitel 3: Erste Rechnung (Beispiel)
     {
-        type: 'task',
+        id: 3,
+        title: "Erste Rechnung",
+        type: "example",
+        badge: "Beispiel",
+        content: `
+            <div class="content-card">
+                <h2>Schritt-für-Schritt Beispiel</h2>
+                
+                <div class="task-text">
+                    <strong>Aufgabe:</strong> Ein Ersatzteil kostet <strong>65,50 €</strong>. 
+                    Die Reparatur dauert <strong>35 Minuten</strong> in der Werkstatt. 
+                    Der Gewinnzuschlag beträgt <strong>9%</strong>.
+                    Berechne den Bruttoverkaufspreis.
+                </div>
+                
+                <div class="calc-section">
+                    <h4>📊 Lösung:</h4>
+                    
+                    <div class="formula-box">
+<strong>1. MEK ermitteln:</strong><br>
+   MEK = 65,50 € (Ersatzteil, kein Porto)<br><br>
+
+<strong>2. MGK berechnen:</strong><br>
+   MGK-Satz für Material = 35,4%<br>
+   MGK = 65,50 × 0,354 = 23,19 €<br><br>
+
+<strong>3. Mges = MEK + MGK:</strong><br>
+   Mges = 65,50 + 23,19 = 88,69 €<br><br>
+
+<strong>4. Fertigungskosten:</strong><br>
+   Fert = (35 ÷ 60) × 58,90 = 34,36 €<br><br>
+
+<strong>5. Selbstkosten:</strong><br>
+   Sk = 88,69 + 34,36 = 123,05 €<br><br>
+
+<strong>6. Gewinn addieren (9%):</strong><br>
+   NVP = 123,05 × 1,09 = 134,12 €<br><br>
+
+<strong>7. MwSt addieren (19%):</strong><br>
+   BVP = 134,12 × 1,19 = <span style="color: var(--success); font-size: 1.2em;">159,60 €</span>
+                    </div>
+                </div>
+            </div>
+        `
+    },
+    
+    // Kapitel 4: Erste eigene Übung
+    {
+        id: 4,
+        title: "Selber rechnen",
+        type: "exercise",
+        badge: "Übung",
         taskId: 3,
-        title: 'Aufgabe 3: Hörgerätereparatur',
-        intro: 'Deine erste Vorwärtskalkulation! Berechne den BVP für eine Reparatur.'
+        taskText: "Ein Kunde bringt ein Hörgerät zur Reparatur. Das Ersatzteil kostet <strong>65,50 €</strong>. Die Reparatur dauert <strong>35 Minuten</strong> in der Werkstatt. Der Gewinnzuschlag beträgt <strong>9%</strong>. Außerdem wird eine Pauschale von <strong>6,95 €</strong> berechnet.",
+        gesucht: "Bruttoverkaufspreis (BVP)",
+        hints: ["MGK-Satz: 35,4% (Material/Reparatur)", "Stundensatz Werkstatt: 58,90 €/h", "Pauschale zu Selbstkosten addieren!"],
+        solution: { mek: 65.50, mgk: 35.4, min1: 35, rate1: 58.90, pausch: 6.95, gewinn: 9 }
     },
+    
+    // Kapitel 5: Handelswaren Theorie
     {
-        type: 'task',
-        taskId: 4,
-        title: 'Aufgabe 4: Wecksystem',
-        intro: 'Achtung: Wecksysteme sind Handelswaren mit 108% MGK!'
-    },
-    {
-        type: 'task',
-        taskId: 9,
-        title: 'Aufgabe 9: Otoplastik',
-        intro: 'Wichtig: Transportkosten ZUERST zu MEK addieren!'
-    },
-    {
-        type: 'task',
-        taskId: 6,
-        title: 'Aufgabe 6: Paar Hörgeräte',
-        intro: 'Komplexere Aufgabe mit zwei verschiedenen Arbeitszeiten.'
-    },
-    {
-        type: 'task',
-        taskId: 11,
-        title: 'Aufgabe 11: Gehörschutz',
-        intro: 'Materialkosten + 2×Filter = Gesamt-MEK'
-    },
-    {
-        type: 'theory',
-        title: 'Rückrechnung: Das Prinzip',
+        id: 5,
+        title: "Handelswaren",
+        type: "theory",
+        badge: "Theorie",
         content: `
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Rückwärts rechnen</span>
-                </div>
-                <p class="text-muted mb-2">Bei Rückrechnungen startest du beim BVP und rechnest zurück:</p>
-                <div style="font-family: monospace; font-size: 0.9rem; line-height: 2; color: var(--text-secondary);">
-                    <div>BVP (Bruttopreis)</div>
-                    <div>÷ 1,19 = NVP</div>
-                    <div>÷ (1 + Gewinn%) = Sk</div>
-                    <div>- Fertigungskosten</div>
-                    <div>÷ (1 + MGK%) = MEK</div>
-                </div>
-            </div>
-            <div class="explanation-card">
-                <h4><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg> Tipp</h4>
-                <p style="color: var(--text-secondary);">
-                    Jeder Schritt ist das Gegenteil der Vorwärtskalkulation. Statt × 1,19 → ÷ 1,19
+            <div class="content-card">
+                <h2>Handelswaren: 108% MGK</h2>
+                <p>
+                    <strong>Handelswaren</strong> sind Produkte, die der Akustiker nicht selbst herstellt, sondern nur weiterverkauft.
                 </p>
+                
+                <div class="example-box">
+                    <h4>📦 Beispiele für Handelswaren</h4>
+                    <ul style="color: var(--text-secondary); margin: 0; padding-left: 20px;">
+                        <li>Wecksysteme / Lichtwecker</li>
+                        <li>Batterien</li>
+                        <li>Pflegeprodukte</li>
+                        <li>Zubehör</li>
+                    </ul>
+                </div>
+                
+                <p>
+                    Der hohe MGK-Satz von <strong style="color: var(--warning);">108%</strong> berücksichtigt, dass der Händler diese Produkte nur im Sortiment hat und keinen großen Fertigungsaufwand hat.
+                </p>
+                
+                <div class="formula-box">
+                    <strong>Beispiel Wecksystem:</strong><br>
+                    MEK = 45,00 €<br>
+                    MGK = 45,00 × 1,08 = 48,60 €<br>
+                    Mges = 45,00 + 48,60 = <strong>93,60 €</strong>
+                </div>
             </div>
         `
     },
+    
+    // Kapitel 6: Wecksystem Übung
     {
-        type: 'practice',
-        title: 'Übungsaufgaben',
+        id: 6,
+        title: "Wecksystem",
+        type: "exercise",
+        badge: "Übung",
+        taskId: 4,
+        taskText: "Ein Kunde möchte ein Wecksystem kaufen. Der Einkaufspreis beträgt <strong>55,00 €</strong>. Beratungszeit: <strong>30 Minuten</strong> (HG-Anpassung). Gewinnzuschlag: <strong>12%</strong>.",
+        gesucht: "Bruttoverkaufspreis (BVP)",
+        hints: ["⚠️ Wecksystem = Handelsware = 108% MGK!", "Stundensatz HG-Anpassung: 60,50 €/h"],
+        solution: { mek: 55.00, mgk: 108, min1: 30, rate1: 60.50, pausch: 0, gewinn: 12 }
+    },
+    
+    // Kapitel 7: Otoplastik (Porto-Trick)
+    {
+        id: 7,
+        title: "Otoplastik",
+        type: "exercise",
+        badge: "Übung",
+        taskId: 9,
+        taskText: "Für einen Kunden wird eine Otoplastik angefertigt. Materialkosten: <strong>12,80 €</strong>. Transportkosten: <strong>3,50 €</strong>. Arbeitszeit Labor: <strong>25 Minuten</strong>. Gewinnzuschlag: <strong>8%</strong>.",
+        gesucht: "Bruttoverkaufspreis (BVP)",
+        hints: ["⚠️ WICHTIG: Transportkosten ZUERST zu MEK addieren!", "MGK-Satz Otoplastik: 35,4%", "Dann MGK auf die SUMME berechnen!"],
+        solution: { mek: 12.80, porto: 3.50, mgk: 35.4, min1: 25, rate1: 58.90, pausch: 0, gewinn: 8 }
+    },
+    
+    // Kapitel 8: Quiz
+    {
+        id: 8,
+        title: "Quiz-Time",
+        type: "quiz",
+        badge: "Quiz",
+        questions: [
+            {
+                q: "Welcher MGK-Satz gilt für ein Wecksystem?",
+                options: ["32,8%", "35,4%", "108%"],
+                correct: 2
+            },
+            {
+                q: "Was ist der Stundensatz für Werkstatt-Arbeiten?",
+                options: ["58,90 €/h", "60,50 €/h", "63,40 €/h"],
+                correct: 0
+            },
+            {
+                q: "Wann werden Transportkosten addiert?",
+                options: ["Nach der MGK-Berechnung", "VOR der MGK-Berechnung zum MEK", "Zum Nettoverkaufspreis"],
+                correct: 1
+            },
+            {
+                q: "Wie berechnet man den BVP aus dem NVP?",
+                options: ["NVP × 0,19", "NVP + 19", "NVP × 1,19"],
+                correct: 2
+            }
+        ]
+    },
+    
+    // Kapitel 8b: Sortier-Spiel
+    {
+        id: '8b',
+        title: "Reihenfolge",
+        type: "sorting",
+        badge: "Spiel",
+        instruction: "Bringe die Kalkulationsschritte in die richtige Reihenfolge:",
+        items: ["BVP", "Selbstkosten", "MEK", "NVP", "Mges"],
+        correctOrder: ["MEK", "Mges", "Selbstkosten", "NVP", "BVP"]
+    },
+    
+    // Kapitel 8c: Lückentext
+    {
+        id: '8c',
+        title: "Formeln",
+        type: "fillblank",
+        badge: "Spiel",
+        instruction: "Vervollständige die Formeln:",
+        blanks: [
+            { text: "Fertigungskosten = Minuten ÷ ___ × Stundensatz", answer: "60", hint: "Minuten in Stunden umrechnen" },
+            { text: "BVP = NVP × ___", answer: "1,19", hint: "MwSt-Faktor" },
+            { text: "MGK Handelswaren = ___ %", answer: "108", hint: "Der höchste Satz" }
+        ]
+    },
+    
+    // Kapitel 9: Paar Hörgeräte
+    {
+        id: 9,
+        title: "Paar Hörgeräte",
+        type: "exercise",
+        badge: "Übung",
+        taskId: 6,
+        taskText: "Ein Kunde kauft ein Paar Hörgeräte. Listenpreis für beide: <strong>1.890,00 €</strong>. Anpasszeit: <strong>90 Minuten</strong> (HG-Anpassung). Audiometrie: <strong>45 Minuten</strong>. Gewinnzuschlag: <strong>15%</strong>.",
+        gesucht: "Bruttoverkaufspreis (BVP)",
+        hints: ["MGK-Satz Hörgeräte: 32,8%", "Zwei verschiedene Stundensätze!", "HG-Anpassung: 60,50 €/h", "Audiometrie: 63,40 €/h"],
+        solution: { mek: 1890.00, mgk: 32.8, min1: 90, rate1: 60.50, min2: 45, rate2: 63.40, pausch: 0, gewinn: 15 },
+        showFert2: true
+    },
+    
+    // Kapitel 10: Rückrechnung
+    {
+        id: 10,
+        title: "Rückrechnung",
+        type: "theory",
+        badge: "Theorie",
         content: `
-            <div class="card" style="text-align: center;">
-                <div style="font-size: 4rem; margin-bottom: 16px;">
-                    <svg class="icon icon-2xl" style="color: var(--success);" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path></svg>
+            <div class="content-card">
+                <h2>Rückwärts rechnen</h2>
+                <p>
+                    Manchmal musst du vom <strong>BVP</strong> zurück zum <strong>MEK</strong> rechnen. Dabei werden alle Schritte <em>umgekehrt</em>.
+                </p>
+                
+                <div class="formula-box">
+<strong>Rückrechnung:</strong><br><br>
+BVP (gegeben)<br>
+÷ 1,19 = NVP<br>
+÷ (1 + Gewinn%) = Sk<br>
+- Fertigungskosten = Mges<br>
+÷ (1 + MGK%) = MEK
                 </div>
-                <h3 style="margin-bottom: 8px;">Gut gemacht!</h3>
-                <p class="text-muted mb-2">Du hast die Grundlagen gelernt. Jetzt kannst du alle Aufgaben üben.</p>
+                
+                <div class="example-box">
+                    <h4>📝 Beispiel</h4>
+                    <p style="color: var(--text-secondary); margin: 0;">
+                        BVP = 200,00 €<br>
+                        NVP = 200 ÷ 1,19 = 168,07 €<br>
+                        Bei 10% Gewinn: Sk = 168,07 ÷ 1,10 = 152,79 €
+                    </p>
+                </div>
             </div>
-            <a href="./trainer.html" class="btn btn-primary btn-block btn-lg" style="text-decoration: none;">
-                <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                Zum Übungsmodus
-            </a>
         `
     },
+    
+    // Kapitel 11: Abschlusstest
     {
-        type: 'finish',
-        title: 'Kurs abgeschlossen!',
-        content: `
-            <div class="course-card" style="background: linear-gradient(135deg, rgba(0, 204, 136, 0.2), rgba(0, 245, 212, 0.1)); border-color: var(--success);">
-                <div style="font-size: 4rem; margin-bottom: 16px;">
-                    <svg class="icon icon-2xl" style="color: var(--success);" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
-                </div>
-                <h2 style="color: var(--success);">Gratulation!</h2>
-                <p>Du hast den Kurs erfolgreich abgeschlossen!</p>
-            </div>
-            <div class="card">
-                <h4 style="margin-bottom: 12px;">Nächste Schritte:</h4>
-                <ul style="list-style: none;">
-                    <li style="padding: 12px 0; border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; gap: 12px;">
-                        <svg class="icon" style="color: var(--accent);" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        Übe alle 11 Aufgaben im Übungsmodus
-                    </li>
-                    <li style="padding: 12px 0; border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; gap: 12px;">
-                        <svg class="icon" style="color: var(--accent);" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        Nutze Zufallszahlen für mehr Übung
-                    </li>
-                    <li style="padding: 12px 0; display: flex; align-items: center; gap: 12px;">
-                        <svg class="icon" style="color: var(--accent);" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        Viel Erfolg bei der Prüfung!
-                    </li>
-                </ul>
-            </div>
-            <a href="./home.html" class="btn btn-success btn-block btn-lg" style="text-decoration: none;">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                Zur Startseite
-            </a>
-        `
+        id: 11,
+        title: "Abschlusstest",
+        type: "exercise",
+        badge: "Prüfung",
+        taskId: 11,
+        taskText: "Für einen Kunden wird ein individueller Gehörschutz angefertigt. Materialmenge: <strong>15,60 €</strong>. Dazu 2 Filter à <strong>4,20 €</strong>. Arbeitszeit Labor: <strong>40 Minuten</strong>. Gewinnzuschlag: <strong>10%</strong>.",
+        gesucht: "Bruttoverkaufspreis (BVP)",
+        hints: ["MEK = Material + 2 × Filter", "MGK-Satz Material: 35,4%", "Stundensatz Werkstatt: 58,90 €/h"],
+        solution: { mek: 24.00, mgk: 35.4, min1: 40, rate1: 58.90, pausch: 0, gewinn: 10 }
+    },
+    
+    // Kapitel 12: Ergebnis
+    {
+        id: 12,
+        title: "Ergebnis",
+        type: "result",
+        badge: "Abschluss"
     }
 ];
 
-let currentStep = 0;
+// ===== STATE =====
+let currentChapter = 0;
+let quizAnswers = [];
+let exerciseResults = [];
+let sessionStats = { correct: 0, wrong: 0, total: 0 };
 
-// Render progress bar
-function renderProgress() {
-    const container = document.getElementById('courseProgress');
-    container.innerHTML = '';
+// ===== FUNCTIONS =====
+
+function updateProgress() {
+    const progress = Math.round(((currentChapter + 1) / CHAPTERS.length) * 100);
+    document.getElementById('progressFill').style.width = progress + '%';
+    document.getElementById('progressText').textContent = `${currentChapter + 1} / ${CHAPTERS.length}`;
+}
+
+function updateHeader() {
+    const chapter = CHAPTERS[currentChapter];
+    document.getElementById('chapterTitle').textContent = `Kapitel ${currentChapter + 1}: ${chapter.title}`;
     
-    COURSE_STEPS.forEach((step, i) => {
-        const stepEl = document.createElement('div');
-        stepEl.className = 'course-step';
+    const badge = document.getElementById('chapterBadge');
+    badge.textContent = chapter.badge;
+    badge.className = 'chapter-badge ' + chapter.type;
+}
+
+function renderContent() {
+    const chapter = CHAPTERS[currentChapter];
+    const content = document.getElementById('contentArea');
+    
+    switch (chapter.type) {
+        case 'theory':
+        case 'example':
+            content.innerHTML = chapter.content;
+            break;
+        case 'exercise':
+            renderExercise(chapter);
+            break;
+        case 'quiz':
+            renderQuiz(chapter);
+            break;
+        case 'sorting':
+            renderSorting(chapter);
+            break;
+        case 'fillblank':
+            renderFillBlank(chapter);
+            break;
+        case 'result':
+            renderResult();
+            break;
+    }
+    
+    updateNavButtons();
+    updateProgress();
+    updateHeader();
+}
+
+function renderExercise(chapter) {
+    const content = document.getElementById('contentArea');
+    
+    let html = `
+        <div class="content-card">
+            <h2>Übung: Aufgabe ${chapter.taskId}</h2>
+            
+            <div class="task-text">
+                ${chapter.taskText}
+                <br><br>
+                <strong>Gesucht:</strong> ${chapter.gesucht}
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                <button type="button" class="hint-btn" onclick="showHint()">?</button>
+            </div>
+            
+            <div id="hintContent" class="hint-box">
+                <h4>💡 Tipps:</h4>
+                <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary);">
+                    ${chapter.hints.map(h => `<li>${h}</li>`).join('')}
+                </ul>
+            </div>
+            
+            <div class="calc-section">
+                <h4>Deine Berechnung:</h4>
+                
+                <div class="calc-row-simple">
+                    <label>MEK (Materialeinzelkosten)</label>
+                    <input type="number" id="inp_mek" step="0.01" placeholder="0,00" inputmode="decimal">
+                    <span class="unit">€</span>
+                </div>
+                
+                ${chapter.solution.porto !== undefined ? `
+                <div class="calc-row-simple">
+                    <label>+ Porto/Transport</label>
+                    <input type="number" id="inp_porto" step="0.01" placeholder="0,00" inputmode="decimal">
+                    <span class="unit">€</span>
+                </div>
+                ` : ''}
+                
+                <div class="calc-row-simple">
+                    <label>MGK-Zuschlag</label>
+                    <input type="number" id="inp_mgk" step="0.1" value="35.4" inputmode="decimal">
+                    <span class="unit">%</span>
+                </div>
+                
+                <div class="calc-row-simple">
+                    <label>Arbeitszeit 1</label>
+                    <input type="number" id="inp_min1" step="1" placeholder="0" inputmode="numeric">
+                    <span class="unit">min</span>
+                </div>
+                
+                <div class="calc-row-simple">
+                    <label>Stundensatz 1</label>
+                    <input type="number" id="inp_rate1" step="0.01" value="58.90" inputmode="decimal">
+                    <span class="unit">€/h</span>
+                </div>
+                
+                ${chapter.showFert2 ? `
+                <div class="calc-row-simple">
+                    <label>Arbeitszeit 2</label>
+                    <input type="number" id="inp_min2" step="1" placeholder="0" inputmode="numeric">
+                    <span class="unit">min</span>
+                </div>
+                
+                <div class="calc-row-simple">
+                    <label>Stundensatz 2</label>
+                    <input type="number" id="inp_rate2" step="0.01" value="63.40" inputmode="decimal">
+                    <span class="unit">€/h</span>
+                </div>
+                ` : ''}
+                
+                ${chapter.solution.pausch !== undefined && chapter.solution.pausch > 0 ? `
+                <div class="calc-row-simple">
+                    <label>+ Pauschale</label>
+                    <input type="number" id="inp_pausch" step="0.01" placeholder="0,00" inputmode="decimal">
+                    <span class="unit">€</span>
+                </div>
+                ` : ''}
+                
+                <div class="calc-row-simple">
+                    <label>Gewinnzuschlag</label>
+                    <input type="number" id="inp_gewinn" step="0.1" placeholder="0" inputmode="decimal">
+                    <span class="unit">%</span>
+                </div>
+            </div>
+            
+            <div class="calc-result-box" id="resultBox" style="display: none;">
+                <div class="label">Dein berechneter BVP:</div>
+                <div class="value" id="calcResult">0,00 €</div>
+            </div>
+            
+            <div id="feedbackBox" style="margin-top: 16px;"></div>
+        </div>
+    `;
+    
+    content.innerHTML = html;
+    
+    // Add live calculation
+    document.querySelectorAll('.calc-section input').forEach(inp => {
+        inp.addEventListener('input', calculateExercise);
+    });
+}
+
+function calculateExercise() {
+    const mek = parseFloat(document.getElementById('inp_mek')?.value) || 0;
+    const porto = parseFloat(document.getElementById('inp_porto')?.value) || 0;
+    const mgk = parseFloat(document.getElementById('inp_mgk')?.value) || 0;
+    const min1 = parseFloat(document.getElementById('inp_min1')?.value) || 0;
+    const rate1 = parseFloat(document.getElementById('inp_rate1')?.value) || 0;
+    const min2 = parseFloat(document.getElementById('inp_min2')?.value) || 0;
+    const rate2 = parseFloat(document.getElementById('inp_rate2')?.value) || 0;
+    const pausch = parseFloat(document.getElementById('inp_pausch')?.value) || 0;
+    const gewinn = parseFloat(document.getElementById('inp_gewinn')?.value) || 0;
+    
+    // Calculate
+    const mekTotal = mek + porto;
+    const mgkAmount = mekTotal * (mgk / 100);
+    const mges = mekTotal + mgkAmount;
+    const fert1 = (min1 / 60) * rate1;
+    const fert2 = (min2 / 60) * rate2;
+    const sk = mges + fert1 + fert2 + pausch;
+    const nvp = sk * (1 + gewinn / 100);
+    const bvp = nvp * 1.19;
+    
+    // Show result
+    const resultBox = document.getElementById('resultBox');
+    if (mek > 0 || min1 > 0) {
+        resultBox.style.display = 'block';
+        document.getElementById('calcResult').textContent = bvp.toFixed(2).replace('.', ',') + ' €';
+    }
+    
+    return bvp;
+}
+
+function checkExercise() {
+    const chapter = CHAPTERS[currentChapter];
+    const sol = chapter.solution;
+    
+    // Get user values
+    const userMek = parseFloat(document.getElementById('inp_mek')?.value) || 0;
+    const userMgk = parseFloat(document.getElementById('inp_mgk')?.value) || 0;
+    const userMin1 = parseFloat(document.getElementById('inp_min1')?.value) || 0;
+    const userGewinn = parseFloat(document.getElementById('inp_gewinn')?.value) || 0;
+    
+    // Calculate correct BVP
+    const mekTotal = sol.mek + (sol.porto || 0);
+    const mgkAmount = mekTotal * (sol.mgk / 100);
+    const mges = mekTotal + mgkAmount;
+    const fert1 = (sol.min1 / 60) * sol.rate1;
+    const fert2 = sol.min2 ? (sol.min2 / 60) * sol.rate2 : 0;
+    const sk = mges + fert1 + fert2 + (sol.pausch || 0);
+    const nvp = sk * (1 + sol.gewinn / 100);
+    const correctBvp = nvp * 1.19;
+    
+    // Get user BVP
+    const userBvp = calculateExercise();
+    
+    // Check (with 1€ tolerance)
+    const isCorrect = Math.abs(userBvp - correctBvp) < 1;
+    
+    // Track result
+    sessionStats.total++;
+    if (isCorrect) {
+        sessionStats.correct++;
+        exerciseResults.push({ taskId: chapter.taskId, correct: true });
+    } else {
+        sessionStats.wrong++;
+        exerciseResults.push({ taskId: chapter.taskId, correct: false });
+    }
+    
+    // Show feedback
+    const feedbackBox = document.getElementById('feedbackBox');
+    if (isCorrect) {
+        feedbackBox.innerHTML = `
+            <div style="background: rgba(0, 204, 136, 0.2); border: 1px solid var(--success); border-radius: var(--radius-sm); padding: 16px; text-align: center;">
+                <div style="font-size: 2rem; margin-bottom: 8px;">✅</div>
+                <strong style="color: var(--success);">Richtig!</strong>
+                <p style="color: var(--text-muted); margin-top: 8px;">Korrekte Lösung: ${correctBvp.toFixed(2).replace('.', ',')} €</p>
+            </div>
+        `;
+    } else {
+        feedbackBox.innerHTML = `
+            <div style="background: rgba(255, 82, 82, 0.2); border: 1px solid var(--danger); border-radius: var(--radius-sm); padding: 16px; text-align: center;">
+                <div style="font-size: 2rem; margin-bottom: 8px;">❌</div>
+                <strong style="color: var(--danger);">Nicht ganz richtig</strong>
+                <p style="color: var(--text-muted); margin-top: 8px;">
+                    Dein Ergebnis: ${userBvp.toFixed(2).replace('.', ',')} €<br>
+                    Richtig wäre: ${correctBvp.toFixed(2).replace('.', ',')} €
+                </p>
+            </div>
+        `;
+    }
+    
+    // Enable next button
+    document.getElementById('nextBtn').disabled = false;
+    
+    return isCorrect;
+}
+
+function renderQuiz(chapter) {
+    const content = document.getElementById('contentArea');
+    quizAnswers = new Array(chapter.questions.length).fill(-1);
+    
+    let html = `<div class="content-card"><h2>Quiz: Teste dein Wissen!</h2>`;
+    
+    chapter.questions.forEach((q, qIndex) => {
+        html += `
+            <div style="margin-bottom: 24px;">
+                <p style="font-weight: 600; margin-bottom: 12px;">${qIndex + 1}. ${q.q}</p>
+                ${q.options.map((opt, oIndex) => `
+                    <div class="quiz-option" data-q="${qIndex}" data-o="${oIndex}" onclick="selectQuizOption(${qIndex}, ${oIndex})">
+                        <div class="radio"></div>
+                        <span>${opt}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    });
+    
+    html += `
+        <button type="button" class="btn btn-primary btn-block" id="checkQuizBtn" onclick="checkQuiz()">
+            Antworten prüfen
+        </button>
+        <div id="quizFeedback"></div>
+    </div>`;
+    
+    content.innerHTML = html;
+    document.getElementById('nextBtn').disabled = true;
+}
+
+function selectQuizOption(qIndex, oIndex) {
+    quizAnswers[qIndex] = oIndex;
+    
+    // Update UI
+    document.querySelectorAll(`.quiz-option[data-q="${qIndex}"]`).forEach(el => {
+        el.classList.remove('selected');
+    });
+    document.querySelector(`.quiz-option[data-q="${qIndex}"][data-o="${oIndex}"]`).classList.add('selected');
+}
+
+function checkQuiz() {
+    const chapter = CHAPTERS[currentChapter];
+    let correct = 0;
+    
+    chapter.questions.forEach((q, qIndex) => {
+        const userAnswer = quizAnswers[qIndex];
+        const options = document.querySelectorAll(`.quiz-option[data-q="${qIndex}"]`);
         
-        if (i < currentStep) {
-            stepEl.classList.add('completed');
-            stepEl.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-        } else if (i === currentStep) {
-            stepEl.classList.add('current');
-            stepEl.textContent = i + 1;
+        options.forEach((opt, oIndex) => {
+            opt.style.pointerEvents = 'none';
+            if (oIndex === q.correct) {
+                opt.classList.add('correct');
+            } else if (oIndex === userAnswer && userAnswer !== q.correct) {
+                opt.classList.add('wrong');
+            }
+        });
+        
+        if (userAnswer === q.correct) correct++;
+    });
+    
+    // Track stats
+    sessionStats.total += chapter.questions.length;
+    sessionStats.correct += correct;
+    sessionStats.wrong += chapter.questions.length - correct;
+    
+    // Show feedback
+    const feedback = document.getElementById('quizFeedback');
+    feedback.innerHTML = `
+        <div style="margin-top: 16px; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm); text-align: center;">
+            <strong>${correct} von ${chapter.questions.length} richtig!</strong>
+        </div>
+    `;
+    
+    document.getElementById('checkQuizBtn').style.display = 'none';
+    document.getElementById('nextBtn').disabled = false;
+}
+
+// ===== SORTING GAME =====
+let sortingItems = [];
+
+function renderSorting(chapter) {
+    const content = document.getElementById('contentArea');
+    // Shuffle items
+    sortingItems = [...chapter.items].sort(() => Math.random() - 0.5);
+    
+    content.innerHTML = `
+        <div class="content-card">
+            <h2>🎮 Sortier-Spiel</h2>
+            <p>${chapter.instruction}</p>
+            
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 16px 0;">
+                Tippe auf die Begriffe in der richtigen Reihenfolge:
+            </p>
+            
+            <div class="drag-container" id="sourceItems">
+                ${sortingItems.map((item, i) => `
+                    <div class="drag-item" data-item="${item}" onclick="selectSortItem(this)">${item}</div>
+                `).join('')}
+            </div>
+            
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 16px 0;">
+                Deine Reihenfolge (1 → 5):
+            </p>
+            
+            <div class="drop-zone" id="targetZone"></div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 16px;">
+                <button type="button" class="btn btn-secondary" onclick="resetSorting()" style="flex: 1;">
+                    ↩️ Zurücksetzen
+                </button>
+                <button type="button" class="btn btn-primary" id="checkSortBtn" onclick="checkSorting()" style="flex: 1;">
+                    Prüfen ✓
+                </button>
+            </div>
+            
+            <div id="sortFeedback"></div>
+        </div>
+    `;
+    
+    document.getElementById('nextBtn').disabled = true;
+}
+
+function selectSortItem(el) {
+    const item = el.getAttribute('data-item');
+    const target = document.getElementById('targetZone');
+    
+    // Move to target
+    el.remove();
+    target.innerHTML += `<div class="drag-item" data-item="${item}" onclick="unselectSortItem(this)">${item}</div>`;
+}
+
+function unselectSortItem(el) {
+    const item = el.getAttribute('data-item');
+    const source = document.getElementById('sourceItems');
+    
+    // Move back to source
+    el.remove();
+    source.innerHTML += `<div class="drag-item" data-item="${item}" onclick="selectSortItem(this)">${item}</div>`;
+}
+
+function resetSorting() {
+    const chapter = CHAPTERS[currentChapter];
+    sortingItems = [...chapter.items].sort(() => Math.random() - 0.5);
+    
+    document.getElementById('sourceItems').innerHTML = sortingItems.map(item => `
+        <div class="drag-item" data-item="${item}" onclick="selectSortItem(this)">${item}</div>
+    `).join('');
+    
+    document.getElementById('targetZone').innerHTML = '';
+    document.getElementById('sortFeedback').innerHTML = '';
+    document.getElementById('checkSortBtn').style.display = 'block';
+}
+
+function checkSorting() {
+    const chapter = CHAPTERS[currentChapter];
+    const userOrder = Array.from(document.querySelectorAll('#targetZone .drag-item')).map(el => el.getAttribute('data-item'));
+    
+    const isCorrect = JSON.stringify(userOrder) === JSON.stringify(chapter.correctOrder);
+    
+    sessionStats.total++;
+    if (isCorrect) {
+        sessionStats.correct++;
+    } else {
+        sessionStats.wrong++;
+    }
+    
+    const target = document.getElementById('targetZone');
+    const feedback = document.getElementById('sortFeedback');
+    
+    if (isCorrect) {
+        target.classList.add('correct');
+        feedback.innerHTML = `
+            <div style="margin-top: 16px; padding: 16px; background: rgba(0, 204, 136, 0.2); border: 1px solid var(--success); border-radius: var(--radius-sm); text-align: center;">
+                <strong style="color: var(--success);">✅ Perfekt!</strong>
+            </div>
+        `;
+    } else {
+        target.classList.add('wrong');
+        feedback.innerHTML = `
+            <div style="margin-top: 16px; padding: 16px; background: rgba(255, 82, 82, 0.2); border: 1px solid var(--danger); border-radius: var(--radius-sm); text-align: center;">
+                <strong style="color: var(--danger);">❌ Nicht ganz richtig</strong>
+                <p style="color: var(--text-muted); margin-top: 8px;">
+                    Richtige Reihenfolge: ${chapter.correctOrder.join(' → ')}
+                </p>
+            </div>
+        `;
+    }
+    
+    document.getElementById('checkSortBtn').style.display = 'none';
+    document.getElementById('nextBtn').disabled = false;
+}
+
+// ===== FILL IN THE BLANK GAME =====
+function renderFillBlank(chapter) {
+    const content = document.getElementById('contentArea');
+    
+    let html = `
+        <div class="content-card">
+            <h2>✏️ Lückentext</h2>
+            <p>${chapter.instruction}</p>
+            
+            <div style="margin-top: 20px;">
+    `;
+    
+    chapter.blanks.forEach((blank, i) => {
+        // Split text at ___
+        const parts = blank.text.split('___');
+        html += `
+            <div style="margin-bottom: 20px; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm);">
+                <p style="font-size: 1.1rem; line-height: 2;">
+                    ${parts[0]}
+                    <span class="fill-blank">
+                        <input type="text" id="blank_${i}" placeholder="?" data-answer="${blank.answer}" style="width: 70px;">
+                    </span>
+                    ${parts[1] || ''}
+                </p>
+                <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">💡 ${blank.hint}</p>
+            </div>
+        `;
+    });
+    
+    html += `
+            </div>
+            
+            <button type="button" class="btn btn-primary btn-block" id="checkBlankBtn" onclick="checkFillBlank()">
+                Prüfen ✓
+            </button>
+            
+            <div id="blankFeedback"></div>
+        </div>
+    `;
+    
+    content.innerHTML = html;
+    document.getElementById('nextBtn').disabled = true;
+}
+
+function checkFillBlank() {
+    const chapter = CHAPTERS[currentChapter];
+    let correct = 0;
+    
+    chapter.blanks.forEach((blank, i) => {
+        const input = document.getElementById(`blank_${i}`);
+        const userAnswer = input.value.trim().replace(',', '.');
+        const correctAnswer = blank.answer.replace(',', '.');
+        
+        input.disabled = true;
+        
+        if (userAnswer === correctAnswer) {
+            input.classList.add('correct');
+            correct++;
         } else {
-            stepEl.classList.add('locked');
-            stepEl.textContent = i + 1;
-        }
-        
-        container.appendChild(stepEl);
-        
-        if (i < COURSE_STEPS.length - 1) {
-            const connector = document.createElement('div');
-            connector.className = 'course-connector';
-            if (i < currentStep) connector.classList.add('completed');
-            container.appendChild(connector);
+            input.classList.add('wrong');
+            input.value = blank.answer;
         }
     });
     
-    document.getElementById('progressBadge').textContent = `${currentStep + 1}/${COURSE_STEPS.length}`;
+    sessionStats.total += chapter.blanks.length;
+    sessionStats.correct += correct;
+    sessionStats.wrong += chapter.blanks.length - correct;
+    
+    const feedback = document.getElementById('blankFeedback');
+    feedback.innerHTML = `
+        <div style="margin-top: 16px; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm); text-align: center;">
+            <strong>${correct} von ${chapter.blanks.length} richtig!</strong>
+        </div>
+    `;
+    
+    document.getElementById('checkBlankBtn').style.display = 'none';
+    document.getElementById('nextBtn').disabled = false;
 }
 
-// Render current step
-function renderStep() {
-    const step = COURSE_STEPS[currentStep];
-    const container = document.getElementById('stepContent');
+function renderResult() {
+    const content = document.getElementById('contentArea');
+    const accuracy = sessionStats.total > 0 ? Math.round((sessionStats.correct / sessionStats.total) * 100) : 0;
     
-    document.getElementById('courseSubtitle').textContent = step.title;
-    
-    if (step.type === 'task') {
-        // Task step - link to trainer
-        container.innerHTML = `
-            <div class="course-card">
-                <h2>${step.title}</h2>
-                <p>${step.intro}</p>
+    content.innerHTML = `
+        <div class="result-hero">
+            <div style="font-size: 4rem;">🏆</div>
+            <h2>Kurs abgeschlossen!</h2>
+            <p style="color: var(--text-muted);">Du hast alle Kapitel durchgearbeitet.</p>
+        </div>
+        
+        <div class="content-card">
+            <h2>Deine Ergebnisse</h2>
+            
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="number">${sessionStats.correct}</div>
+                    <div class="label">Richtig</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">${sessionStats.wrong}</div>
+                    <div class="label">Falsch</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">${accuracy}%</div>
+                    <div class="label">Genauigkeit</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">${CHAPTERS.length}</div>
+                    <div class="label">Kapitel</div>
+                </div>
             </div>
-            <a href="./trainer.html?task=${step.taskId}&kurs=1" class="btn btn-primary btn-block btn-lg" style="text-decoration: none;">
-                <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                Aufgabe starten
+        </div>
+        
+        <div class="content-card">
+            <h2>Was du gelernt hast</h2>
+            <ul style="color: var(--text-secondary); line-height: 2; padding-left: 20px;">
+                <li>Das Kalkulationsschema (MEK → BVP)</li>
+                <li>MGK-Zuschlagssätze (32,8% / 35,4% / 108%)</li>
+                <li>Fertigungskostenberechnung</li>
+                <li>Der Porto-Trick bei Otoplastik</li>
+                <li>Vorwärts- und Rückwärtsrechnung</li>
+            </ul>
+        </div>
+        
+        <div class="nav-buttons">
+            <button type="button" class="btn btn-secondary" onclick="restartCourse()">
+                🔄 Kurs wiederholen
+            </button>
+            <a href="./profil.html" class="btn btn-primary" style="text-decoration: none;">
+                👤 Zum Profil
             </a>
-        `;
-    } else {
-        container.innerHTML = step.content;
-    }
+        </div>
+    `;
     
-    // Update nav buttons
-    document.getElementById('prevBtn').disabled = currentStep === 0;
+    // Hide default nav
+    document.getElementById('navButtons').style.display = 'none';
     
-    if (currentStep === COURSE_STEPS.length - 1) {
-        document.getElementById('nextBtn').style.display = 'none';
-    } else {
-        document.getElementById('nextBtn').style.display = 'flex';
-    }
-    
-    renderProgress();
-    
-    // Save progress
-    saveCourseProgress();
+    // Save progress to profile
+    saveProgress();
 }
 
-// Navigation
-document.getElementById('prevBtn').addEventListener('click', () => {
-    if (currentStep > 0) {
-        currentStep--;
-        renderStep();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-});
-
-document.getElementById('nextBtn').addEventListener('click', () => {
-    if (currentStep < COURSE_STEPS.length - 1) {
-        currentStep++;
-        renderStep();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-});
-
-// Save/Load progress
-function saveCourseProgress() {
+function saveProgress() {
     try {
-        localStorage.setItem('kurs_progress', currentStep.toString());
+        localStorage.setItem('kurs_completed', 'true');
+        localStorage.setItem('kurs_stats', JSON.stringify(sessionStats));
     } catch (e) {}
 }
 
-function loadCourseProgress() {
+function loadProgress() {
     try {
-        const saved = localStorage.getItem('kurs_progress');
+        const saved = localStorage.getItem('kurs_chapter');
         if (saved) {
-            currentStep = parseInt(saved) || 0;
+            currentChapter = parseInt(saved) || 0;
         }
     } catch (e) {}
 }
 
-// Check for return from task
-const params = new URLSearchParams(window.location.search);
-if (params.get('completed')) {
-    loadCourseProgress();
-    currentStep++;
-    if (currentStep >= COURSE_STEPS.length) currentStep = COURSE_STEPS.length - 1;
-} else {
-    loadCourseProgress();
+function saveChapter() {
+    try {
+        localStorage.setItem('kurs_chapter', currentChapter.toString());
+    } catch (e) {}
 }
 
-// Init
-renderStep();
+function restartCourse() {
+    currentChapter = 0;
+    sessionStats = { correct: 0, wrong: 0, total: 0 };
+    exerciseResults = [];
+    quizAnswers = [];
+    saveChapter();
+    document.getElementById('navButtons').style.display = 'grid';
+    renderContent();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateNavButtons() {
+    const chapter = CHAPTERS[currentChapter];
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    prevBtn.disabled = currentChapter === 0;
+    
+    // For exercises, disable next until checked
+    if (chapter.type === 'exercise') {
+        nextBtn.textContent = 'Prüfen ✓';
+        nextBtn.onclick = () => {
+            if (nextBtn.textContent.includes('Prüfen')) {
+                checkExercise();
+                nextBtn.textContent = 'Weiter →';
+                nextBtn.onclick = goNext;
+            }
+        };
+    } else if (chapter.type === 'quiz' || chapter.type === 'sorting' || chapter.type === 'fillblank') {
+        nextBtn.disabled = true;
+        nextBtn.textContent = 'Weiter →';
+        nextBtn.onclick = goNext;
+    } else if (chapter.type === 'result') {
+        // Hide for result page
+    } else {
+        nextBtn.disabled = false;
+        nextBtn.textContent = 'Weiter →';
+        nextBtn.onclick = goNext;
+    }
+}
+
+function goPrev() {
+    if (currentChapter > 0) {
+        currentChapter--;
+        saveChapter();
+        renderContent();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function goNext() {
+    if (currentChapter < CHAPTERS.length - 1) {
+        currentChapter++;
+        saveChapter();
+        renderContent();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function showHint() {
+    const hintBox = document.getElementById('hintContent');
+    hintBox.classList.toggle('show');
+}
+
+function closeHint() {
+    document.getElementById('hintModal').classList.remove('show');
+}
+
+// ===== INIT =====
+document.getElementById('prevBtn').addEventListener('click', goPrev);
+document.getElementById('nextBtn').addEventListener('click', goNext);
+
+// Check profile
+STORAGE.onReady(async () => {
+    await PROFILES.init();
+    
+    const profile = PROFILES.getCurrent();
+    if (!profile) {
+        window.location.href = './index.html';
+        return;
+    }
+    
+    loadProgress();
+    renderContent();
+});
 </script>
 
 </body>
 </html>
-

@@ -162,11 +162,10 @@
 </div>
 
 <!-- Scripts - storage.js MUST come before profiles.js -->
-<script src="./js/storage.js?v=6"></script>
-<script src="./js/profanity.js?v=6"></script>
-<script src="./js/profiles.js?v=6"></script>
-<script src="./js/generator.js?v=6"></script>
-<script src="./js/icons.js?v=6"></script>
+<script src="./js/storage.js?v=7"></script>
+<script src="./js/profanity.js?v=7"></script>
+<script src="./js/profiles.js?v=7"></script>
+<script src="./js/generator.js?v=7"></script>
 <script>
 // ===== APP INITIALIZATION =====
 
@@ -263,7 +262,7 @@ function showProfileModal(name) {
 async function loginProfile(name) {
     const result = await PROFILES.login(name);
     if (result.success) {
-        window.location.href = './home.html';
+        window.location.href = './kurs.html';
     }
 }
 
@@ -320,7 +319,7 @@ async function handleStart() {
         if (result.warning) {
             alert('⚠️ ' + result.warning);
         }
-        window.location.href = './home.html';
+        window.location.href = './kurs.html';
     } else {
         showError(result.error);
     }
@@ -384,7 +383,7 @@ async function initApp() {
         const currentProfile = PROFILES.getCurrent();
         if (currentProfile) {
             console.log('👤 Aktives Profil gefunden:', currentProfile.name);
-            window.location.href = './home.html';
+            window.location.href = './kurs.html';
             return;
         }
         

@@ -619,27 +619,36 @@ body {
     color: var(--warning);
 }
 
-/* Help Button */
+/* Help Button - Mobile optimized (44x44px minimum touch target) */
 .help-btn {
-    width: 28px;
-    height: 28px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     border-radius: 50%;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: bold;
     cursor: pointer;
     transition: all var(--transition);
     display: flex;
     align-items: center;
     justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 245, 212, 0.3);
+    user-select: none;
+    position: relative;
+    z-index: 10;
 }
 
-.help-btn:hover {
+.help-btn:hover,
+.help-btn:active {
     background: var(--accent);
     border-color: var(--accent);
     color: var(--bg-dark);
+    transform: scale(1.05);
 }
 
 /* Input Boxes */
