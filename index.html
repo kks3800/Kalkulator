@@ -231,10 +231,38 @@ function handleStart() {
     // Neues Profil erstellen
     const result = PROFILES.create(name);
     if (result.success) {
+        // Warnung anzeigen wenn nur sessionStorage (privater Modus)
+        if (result.warning) {
+            alert('⚠️ ' + result.warning);
+        }
         window.location.href = './home.html';
     } else {
         showError(result.error);
     }
+}
+
+// Storage-Status beim Start prüfen
+const storageStatus = PROFILES.getStorageStatus();
+if (!storageStatus.available) {
+    // Warnung anzeigen dass Storage eingeschränkt ist
+    const warningDiv = document.createElement('div');
+    warningDiv.className = 'card';
+    warningDiv.style.background = 'linear-gradient(135deg, rgba(255,71,87,0.2), rgba(255,71,87,0.1))';
+    warningDiv.style.borderColor = 'var(--danger)';
+    warningDiv.innerHTML = `
+        <div class="card-header">
+            <span class="card-title" style="color: var(--danger);">⚠️ Eingeschränkter Modus</span>
+        </div>
+        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.6;">
+            <strong>Speichern ist eingeschränkt.</strong><br><br>
+            Mögliche Ursachen:<br>
+            • Privater/Inkognito Modus aktiv<br>
+            • In-App Browser (WhatsApp, Instagram)<br>
+            • Cookies blockiert<br><br>
+            <strong>Lösung:</strong> Öffne die Seite in Safari/Chrome (nicht im privaten Modus).
+        </p>
+    `;
+    document.querySelector('.container').insertBefore(warningDiv, document.getElementById('loginCard'));
 }
 
 // Fehler anzeigen
