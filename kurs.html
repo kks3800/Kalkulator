@@ -470,7 +470,7 @@
             gap: 20px;
             padding: 20px 0;
         }
-        .flashcard {
+        .flashcard-card {
             width: 100%;
             max-width: 320px;
             height: 200px;
@@ -478,7 +478,8 @@
             position: relative;
             margin: 0 auto;
         }
-        .flashcard-front, .flashcard-back {
+        .flashcard-card .flashcard-front, 
+        .flashcard-card .flashcard-back {
             position: absolute;
             top: 0;
             left: 0;
@@ -505,10 +506,10 @@
             color: var(--bg-dark);
             opacity: 0;
         }
-        .flashcard.flipped .flashcard-front {
+        .flashcard-card.flipped .flashcard-front {
             opacity: 0;
         }
-        .flashcard.flipped .flashcard-back {
+        .flashcard-card.flipped .flashcard-back {
             opacity: 1;
         }
         .flashcard-progress {
@@ -1663,7 +1664,7 @@ function renderFlashcards(chapter) {
             <p class="text-muted">Tippe auf die Karte um die Antwort zu sehen. Wie viele kannst du ohne Nachdenken?</p>
             
             <div class="flashcard-container">
-                <div class="flashcard" id="flashcard" onclick="flipCard()">
+                <div class="flashcard-card" id="flashcard" onclick="flipCard()">
                     <div class="flashcard-front" id="cardFront">
                         ${chapter.cards[0].front}
                     </div>
