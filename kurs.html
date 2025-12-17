@@ -16,6 +16,9 @@
             border-radius: var(--radius);
             padding: 16px;
             margin-bottom: 16px;
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
         }
         .chapter-title {
             font-size: 1rem;
@@ -36,6 +39,10 @@
         .chapter-badge.theory { background: #8b5cf6; color: white; }
         .chapter-badge.exercise { background: var(--accent); }
         .chapter-badge.quiz { background: var(--warning); color: var(--bg-dark); }
+        .chapter-badge.sorting { background: var(--warning); color: var(--bg-dark); }
+        .chapter-badge.fillblank { background: var(--warning); color: var(--bg-dark); }
+        .chapter-badge.flashcard { background: #f59e0b; color: var(--bg-dark); }
+        .chapter-badge.matching { background: #f59e0b; color: var(--bg-dark); }
         .chapter-badge.result { background: var(--success); color: white; }
         
         .progress-compact {
@@ -582,7 +589,7 @@
     </div>
 
     <!-- Content Area (filled by JS) -->
-    <div id="contentArea">
+    <div id="contentArea" style="position: relative; z-index: 1;">
         <!-- Dynamic content -->
     </div>
 
