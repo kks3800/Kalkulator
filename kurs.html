@@ -454,6 +454,110 @@
             border-color: var(--accent) !important;
             color: var(--accent) !important;
         }
+        
+        /* Flashcard Styles */
+        .flashcard-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 0;
+        }
+        .flashcard {
+            width: 100%;
+            max-width: 320px;
+            height: 200px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flashcard-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: var(--radius);
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        .flashcard-front {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid var(--accent);
+            color: var(--text-primary);
+        }
+        .flashcard-back {
+            background: linear-gradient(135deg, var(--accent), #00b894);
+            color: var(--bg-dark);
+            transform: rotateY(180deg);
+        }
+        .flashcard-progress {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .flashcard-controls {
+            display: flex;
+            gap: 12px;
+        }
+        
+        /* Matching Game Styles */
+        .matching-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .matching-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .match-item {
+            padding: 14px 16px;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        .match-item:hover {
+            border-color: var(--accent);
+        }
+        .match-item.selected {
+            border-color: var(--accent);
+            background: rgba(0, 245, 212, 0.15);
+        }
+        .match-item.matched {
+            border-color: var(--success);
+            background: rgba(0, 204, 136, 0.2);
+            cursor: default;
+            opacity: 0.7;
+        }
+        .match-item.wrong-match {
+            border-color: var(--danger);
+            background: rgba(255, 82, 82, 0.2);
+            animation: shake 0.3s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
     </style>
 </head>
 <body>
@@ -518,7 +622,7 @@
 <div class="modal-overlay" id="hintModal">
     <div class="modal">
         <div class="modal-header">
-            <h3 id="hintTitle">💡 Tipp</h3>
+            <h3 id="hintTitle">Hilfe</h3>
             <button type="button" class="modal-close" onclick="closeHint()">×</button>
         </div>
         <div class="modal-body" id="hintBody"></div>
@@ -553,7 +657,7 @@ const CHAPTERS = [
                 </p>
                 
                 <div class="example-box">
-                    <h4>📋 Das Kalkulationsschema</h4>
+                    <h4>Das Kalkulationsschema</h4>
                     <div class="formula-box">
 Listenpreis / Einkauf<br>
 + Bezugskosten (Porto)<br>
@@ -590,21 +694,21 @@ Listenpreis / Einkauf<br>
                 
                 <table class="info-table">
                     <tr>
-                        <td>🔊 Hörgeräte</td>
+                        <td>Hörgeräte</td>
                         <td style="color: var(--accent);">32,8 %</td>
                     </tr>
                     <tr>
-                        <td>👂 Otoplastik / Material</td>
+                        <td>Otoplastik / Material</td>
                         <td style="color: var(--success);">35,4 %</td>
                     </tr>
                     <tr>
-                        <td>⏰ Handelswaren (Wecker, Batterien)</td>
+                        <td>Handelswaren (Wecker, Batterien)</td>
                         <td style="color: var(--warning);">108 %</td>
                     </tr>
                 </table>
                 
                 <div class="example-box">
-                    <h4>⚠️ Wichtig zu merken</h4>
+                    <h4>Wichtig zu merken</h4>
                     <p style="color: var(--text-secondary); margin: 0;">
                         <strong>Handelswaren</strong> wie Wecksysteme, Batterien, Pflegeprodukte haben den höchsten MGK-Satz von <strong style="color: var(--warning);">108%</strong>!
                     </p>
@@ -656,7 +760,7 @@ Listenpreis / Einkauf<br>
                 </div>
                 
                 <div class="calc-section">
-                    <h4>📊 Lösung:</h4>
+                    <h4>Lösung:</h4>
                     
                     <div class="formula-box">
 <strong>1. MEK ermitteln:</strong><br>
@@ -713,7 +817,7 @@ Listenpreis / Einkauf<br>
                 </p>
                 
                 <div class="example-box">
-                    <h4>📦 Beispiele für Handelswaren</h4>
+                    <h4>Beispiele für Handelswaren</h4>
                     <ul style="color: var(--text-secondary); margin: 0; padding-left: 20px;">
                         <li>Wecksysteme / Lichtwecker</li>
                         <li>Batterien</li>
@@ -745,7 +849,7 @@ Listenpreis / Einkauf<br>
         taskId: 4,
         taskText: "Ein Kunde möchte ein Wecksystem kaufen. Der Einkaufspreis beträgt <strong>55,00 €</strong>. Beratungszeit: <strong>30 Minuten</strong> (HG-Anpassung). Gewinnzuschlag: <strong>12%</strong>.",
         gesucht: "Bruttoverkaufspreis (BVP)",
-        hints: ["⚠️ Wecksystem = Handelsware = 108% MGK!", "Stundensatz HG-Anpassung: 60,50 €/h"],
+        hints: ["ACHTUNG: Wecksystem = Handelsware = 108% MGK!", "Stundensatz HG-Anpassung: 60,50 €/h"],
         solution: { mek: 55.00, mgk: 108, min1: 30, rate1: 60.50, pausch: 0, gewinn: 12 }
     },
     
@@ -758,7 +862,7 @@ Listenpreis / Einkauf<br>
         taskId: 9,
         taskText: "Für einen Kunden wird eine Otoplastik angefertigt. Materialkosten: <strong>12,80 €</strong>. Transportkosten: <strong>3,50 €</strong>. Arbeitszeit Labor: <strong>25 Minuten</strong>. Gewinnzuschlag: <strong>8%</strong>.",
         gesucht: "Bruttoverkaufspreis (BVP)",
-        hints: ["⚠️ WICHTIG: Transportkosten ZUERST zu MEK addieren!", "MGK-Satz Otoplastik: 35,4%", "Dann MGK auf die SUMME berechnen!"],
+        hints: ["WICHTIG: Transportkosten ZUERST zu MEK addieren!", "MGK-Satz Otoplastik: 35,4%", "Dann MGK auf die SUMME berechnen!"],
         solution: { mek: 12.80, porto: 3.50, mgk: 35.4, min1: 25, rate1: 58.90, pausch: 0, gewinn: 8 }
     },
     
@@ -854,7 +958,7 @@ BVP (gegeben)<br>
                 </div>
                 
                 <div class="example-box">
-                    <h4>📝 Beispiel</h4>
+                    <h4>Beispiel</h4>
                     <p style="color: var(--text-secondary); margin: 0;">
                         BVP = 200,00 €<br>
                         NVP = 200 ÷ 1,19 = 168,07 €<br>
@@ -865,22 +969,140 @@ BVP (gegeben)<br>
         `
     },
     
-    // Kapitel 11: Abschlusstest
+    // Kapitel 11: Zusätzliche Übung - Batterien
     {
         id: 11,
+        title: "Batterien",
+        type: "exercise",
+        badge: "Übung",
+        taskId: 12,
+        taskText: "Ein Kunde kauft 6 Packungen Hörgerätebatterien. Einkaufspreis pro Packung: <strong>2,50 €</strong>. Beratungszeit: <strong>10 Minuten</strong> (HG-Anpassung). Gewinnzuschlag: <strong>20%</strong>.",
+        gesucht: "Bruttoverkaufspreis (BVP)",
+        hints: ["MEK = 6 × 2,50 = 15,00 €", "Batterien = Handelsware = 108% MGK!", "Stundensatz HG-Anpassung: 60,50 €/h"],
+        solution: { mek: 15.00, mgk: 108, min1: 10, rate1: 60.50, pausch: 0, gewinn: 20 }
+    },
+    
+    // Kapitel 12: Zusätzliche Übung - Reinigungsset
+    {
+        id: 12,
+        title: "Reinigungsset",
+        type: "exercise",
+        badge: "Übung",
+        taskId: 13,
+        taskText: "Ein Pflegeset für Hörgeräte wird verkauft. Einkaufspreis: <strong>8,90 €</strong>. Versandkosten: <strong>1,50 €</strong>. Keine Beratung nötig. Gewinnzuschlag: <strong>25%</strong>.",
+        gesucht: "Bruttoverkaufspreis (BVP)",
+        hints: ["Pflegeset = Handelsware = 108% MGK", "Versandkosten ZUERST addieren!", "Keine Fertigungskosten"],
+        solution: { mek: 8.90, porto: 1.50, mgk: 108, min1: 0, rate1: 0, pausch: 0, gewinn: 25 }
+    },
+    
+    // Kapitel 13: Schnelltest - Flashcards
+    {
+        id: 13,
+        title: "Schnelltest",
+        type: "flashcard",
+        badge: "Spiel",
+        cards: [
+            { front: "MGK-Satz Hörgeräte?", back: "32,8 %" },
+            { front: "MGK-Satz Otoplastik?", back: "35,4 %" },
+            { front: "MGK-Satz Handelswaren?", back: "108 %" },
+            { front: "Stundensatz Werkstatt?", back: "58,90 €/h" },
+            { front: "Stundensatz HG-Anpassung?", back: "60,50 €/h" },
+            { front: "Stundensatz Audiometrie?", back: "63,40 €/h" },
+            { front: "MwSt-Faktor?", back: "× 1,19" },
+            { front: "Was sind Handelswaren?", back: "Batterien, Wecker, Zubehör" }
+        ]
+    },
+    
+    // Kapitel 14: Zuordnungsspiel
+    {
+        id: 14,
+        title: "Zuordnung",
+        type: "matching",
+        badge: "Spiel",
+        instruction: "Ordne die Begriffe richtig zu:",
+        pairs: [
+            { left: "Wecksystem", right: "108 %" },
+            { left: "Otoplastik", right: "35,4 %" },
+            { left: "Hörgerät", right: "32,8 %" },
+            { left: "Werkstatt", right: "58,90 €/h" }
+        ]
+    },
+    
+    // Kapitel 15: Abschlusstest
+    {
+        id: 15,
         title: "Abschlusstest",
         type: "exercise",
         badge: "Prüfung",
         taskId: 11,
         taskText: "Für einen Kunden wird ein individueller Gehörschutz angefertigt. Materialmenge: <strong>15,60 €</strong>. Dazu 2 Filter à <strong>4,20 €</strong>. Arbeitszeit Labor: <strong>40 Minuten</strong>. Gewinnzuschlag: <strong>10%</strong>.",
         gesucht: "Bruttoverkaufspreis (BVP)",
-        hints: ["MEK = Material + 2 × Filter", "MGK-Satz Material: 35,4%", "Stundensatz Werkstatt: 58,90 €/h"],
+        hints: ["MEK = Material + 2 × Filter = 24,00 €", "MGK-Satz Material: 35,4%", "Stundensatz Werkstatt: 58,90 €/h"],
         solution: { mek: 24.00, mgk: 35.4, min1: 40, rate1: 58.90, pausch: 0, gewinn: 10 }
     },
     
-    // Kapitel 12: Ergebnis
+    // Kapitel 16: Lerntipps
     {
-        id: 12,
+        id: 16,
+        title: "Lerntipps",
+        type: "theory",
+        badge: "Tipps",
+        content: `
+            <div class="content-card">
+                <h2>So merkst du dir alles!</h2>
+                
+                <div class="example-box" style="margin-bottom: 20px;">
+                    <h4>MGK-Sätze merken</h4>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 2;">
+                        <strong>H</strong>andelswaren = <strong>H</strong>öchster Satz = <strong>108%</strong><br>
+                        <strong>O</strong>toplastik = <strong>O</strong>hne viel Aufwand = <strong>35,4%</strong><br>
+                        <strong>H</strong>örgeräte = <strong>H</strong>auptsache = <strong>32,8%</strong>
+                    </p>
+                </div>
+                
+                <div class="example-box" style="margin-bottom: 20px;">
+                    <h4>Stundensätze merken</h4>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 2;">
+                        <strong>W</strong>erkstatt = 58,90 (fast <strong>59</strong>)<br>
+                        <strong>A</strong>npassung = 60,50 (genau <strong>60,50</strong>)<br>
+                        <strong>A</strong>udiometrie = 63,40 (höchster, weil teuer)
+                    </p>
+                </div>
+                
+                <div class="example-box" style="margin-bottom: 20px;">
+                    <h4>Die Reihenfolge</h4>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem;">
+                        Merksatz: <strong>"Mein Mensch Sucht Neue Bücher"</strong>
+                    </p>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">
+                        <strong>M</strong>EK → <strong>M</strong>ges → <strong>S</strong>k → <strong>N</strong>VP → <strong>B</strong>VP
+                    </p>
+                </div>
+                
+                <div class="example-box" style="margin-bottom: 20px;">
+                    <h4>Der Porto-Trick</h4>
+                    <p style="color: var(--text-secondary);">
+                        <strong>ZUERST Porto, DANN Prozent!</strong><br>
+                        Transportkosten immer VOR der MGK-Berechnung zum MEK addieren.
+                    </p>
+                </div>
+                
+                <div class="example-box">
+                    <h4>Häufige Fehler vermeiden</h4>
+                    <ul style="color: var(--text-secondary); line-height: 2;">
+                        <li>Falsche MGK: Ist es eine <strong>Handelsware</strong>? → 108%!</li>
+                        <li>Porto vergessen: Immer prüfen ob Versand dabei ist</li>
+                        <li>MwSt vergessen: Am Ende IMMER × 1,19</li>
+                        <li>Minuten nicht umrechnen: Min ÷ 60 = Stunden</li>
+                    </ul>
+                </div>
+            </div>
+        `
+    },
+    
+    // Kapitel 17: Ergebnis
+    {
+        id: 17,
         title: "Ergebnis",
         type: "result",
         badge: "Abschluss"
@@ -931,6 +1153,12 @@ function renderContent() {
         case 'fillblank':
             renderFillBlank(chapter);
             break;
+        case 'flashcard':
+            renderFlashcards(chapter);
+            break;
+        case 'matching':
+            renderMatching(chapter);
+            break;
         case 'result':
             renderResult();
             break;
@@ -959,7 +1187,7 @@ function renderExercise(chapter) {
             </div>
             
             <div id="hintContent" class="hint-box">
-                <h4>💡 Tipps:</h4>
+                <h4>Tipps:</h4>
                 <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary);">
                     ${chapter.hints.map(h => `<li>${h}</li>`).join('')}
                 </ul>
@@ -1118,7 +1346,7 @@ function checkExercise() {
     if (isCorrect) {
         feedbackBox.innerHTML = `
             <div style="background: rgba(0, 204, 136, 0.2); border: 1px solid var(--success); border-radius: var(--radius-sm); padding: 16px; text-align: center;">
-                <div style="font-size: 2rem; margin-bottom: 8px;">✅</div>
+                <div style="font-size: 2rem; margin-bottom: 8px; color: var(--success);">&#10003;</div>
                 <strong style="color: var(--success);">Richtig!</strong>
                 <p style="color: var(--text-muted); margin-top: 8px;">Korrekte Lösung: ${correctBvp.toFixed(2).replace('.', ',')} €</p>
             </div>
@@ -1126,7 +1354,7 @@ function checkExercise() {
     } else {
         feedbackBox.innerHTML = `
             <div style="background: rgba(255, 82, 82, 0.2); border: 1px solid var(--danger); border-radius: var(--radius-sm); padding: 16px; text-align: center;">
-                <div style="font-size: 2rem; margin-bottom: 8px;">❌</div>
+                <div style="font-size: 2rem; margin-bottom: 8px; color: var(--danger);">&#10007;</div>
                 <strong style="color: var(--danger);">Nicht ganz richtig</strong>
                 <p style="color: var(--text-muted); margin-top: 8px;">
                     Dein Ergebnis: ${userBvp.toFixed(2).replace('.', ',')} €<br>
@@ -1230,7 +1458,7 @@ function renderSorting(chapter) {
     
     content.innerHTML = `
         <div class="content-card">
-            <h2>🎮 Sortier-Spiel</h2>
+            <h2>Sortier-Spiel</h2>
             <p>${chapter.instruction}</p>
             <p class="text-muted" style="font-size: 0.85rem;">Du kannst auch überspringen wenn du möchtest.</p>
             
@@ -1252,7 +1480,7 @@ function renderSorting(chapter) {
             
             <div style="display: flex; gap: 12px; margin-top: 16px;">
                 <button type="button" class="btn btn-secondary" onclick="resetSorting()" style="flex: 1;">
-                    ↩️ Zurücksetzen
+                    Zurücksetzen
                 </button>
                 <button type="button" class="btn btn-primary" id="checkSortBtn" onclick="checkSorting()" style="flex: 1;">
                     Prüfen ✓
@@ -1315,14 +1543,14 @@ function checkSorting() {
         target.classList.add('correct');
         feedback.innerHTML = `
             <div style="margin-top: 16px; padding: 16px; background: rgba(0, 204, 136, 0.2); border: 1px solid var(--success); border-radius: var(--radius-sm); text-align: center;">
-                <strong style="color: var(--success);">✅ Perfekt!</strong>
+                <strong style="color: var(--success);">Perfekt!</strong>
             </div>
         `;
     } else {
         target.classList.add('wrong');
         feedback.innerHTML = `
             <div style="margin-top: 16px; padding: 16px; background: rgba(255, 82, 82, 0.2); border: 1px solid var(--danger); border-radius: var(--radius-sm); text-align: center;">
-                <strong style="color: var(--danger);">❌ Nicht ganz richtig</strong>
+                <strong style="color: var(--danger);">Nicht ganz richtig</strong>
                 <p style="color: var(--text-muted); margin-top: 8px;">
                     Richtige Reihenfolge: ${chapter.correctOrder.join(' → ')}
                 </p>
@@ -1340,7 +1568,7 @@ function renderFillBlank(chapter) {
     
     let html = `
         <div class="content-card">
-            <h2>✏️ Lückentext</h2>
+            <h2>Lückentext</h2>
             <p>${chapter.instruction}</p>
             <p class="text-muted" style="font-size: 0.85rem;">Du kannst auch überspringen wenn du möchtest.</p>
             
@@ -1359,7 +1587,7 @@ function renderFillBlank(chapter) {
                     </span>
                     ${parts[1] || ''}
                 </p>
-                <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">💡 ${blank.hint}</p>
+                <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">Tipp: ${blank.hint}</p>
             </div>
         `;
     });
@@ -1413,13 +1641,185 @@ function checkFillBlank() {
     document.getElementById('nextBtn').disabled = false;
 }
 
+// ===== FLASHCARDS =====
+let currentCard = 0;
+let cardFlipped = false;
+
+function renderFlashcards(chapter) {
+    const content = document.getElementById('contentArea');
+    currentCard = 0;
+    cardFlipped = false;
+    
+    content.innerHTML = `
+        <div class="content-card">
+            <h2>Schnelltest</h2>
+            <p class="text-muted">Tippe auf die Karte um die Antwort zu sehen. Wie viele kannst du ohne Nachdenken?</p>
+            
+            <div class="flashcard-container">
+                <div class="flashcard" id="flashcard" onclick="flipCard()">
+                    <div class="flashcard-inner" id="flashcardInner">
+                        <div class="flashcard-front" id="cardFront">
+                            ${chapter.cards[0].front}
+                        </div>
+                        <div class="flashcard-back" id="cardBack">
+                            ${chapter.cards[0].back}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flashcard-progress">
+                    <span id="cardProgress">1 / ${chapter.cards.length}</span>
+                </div>
+                
+                <div class="flashcard-controls">
+                    <button type="button" class="btn btn-secondary" onclick="prevCard()" id="prevCardBtn" disabled>
+                        Zurück
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="nextCard()" id="nextCardBtn">
+                        Nächste
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function flipCard() {
+    cardFlipped = !cardFlipped;
+    const inner = document.getElementById('flashcardInner');
+    if (cardFlipped) {
+        inner.classList.add('flipped');
+    } else {
+        inner.classList.remove('flipped');
+    }
+}
+
+function nextCard() {
+    const chapter = CHAPTERS[currentChapter];
+    if (currentCard < chapter.cards.length - 1) {
+        currentCard++;
+        updateFlashcard();
+    }
+}
+
+function prevCard() {
+    if (currentCard > 0) {
+        currentCard--;
+        updateFlashcard();
+    }
+}
+
+function updateFlashcard() {
+    const chapter = CHAPTERS[currentChapter];
+    cardFlipped = false;
+    document.getElementById('flashcardInner').classList.remove('flipped');
+    document.getElementById('cardFront').textContent = chapter.cards[currentCard].front;
+    document.getElementById('cardBack').textContent = chapter.cards[currentCard].back;
+    document.getElementById('cardProgress').textContent = `${currentCard + 1} / ${chapter.cards.length}`;
+    document.getElementById('prevCardBtn').disabled = currentCard === 0;
+    document.getElementById('nextCardBtn').disabled = currentCard === chapter.cards.length - 1;
+}
+
+// ===== MATCHING GAME =====
+let matchingState = { left: null, right: null, matched: [] };
+
+function renderMatching(chapter) {
+    const content = document.getElementById('contentArea');
+    matchingState = { left: null, right: null, matched: [] };
+    
+    // Shuffle the right side
+    const shuffledRight = [...chapter.pairs.map(p => p.right)].sort(() => Math.random() - 0.5);
+    
+    content.innerHTML = `
+        <div class="content-card">
+            <h2>Zuordnungsspiel</h2>
+            <p class="text-muted">${chapter.instruction}</p>
+            <p class="text-muted" style="font-size: 0.85rem;">Tippe links, dann rechts um zu verbinden.</p>
+            
+            <div class="matching-container">
+                <div class="matching-column" id="leftColumn">
+                    ${chapter.pairs.map((p, i) => `
+                        <div class="match-item left" data-index="${i}" data-value="${p.left}" onclick="selectMatch(this, 'left')">
+                            ${p.left}
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="matching-column" id="rightColumn">
+                    ${shuffledRight.map((r, i) => `
+                        <div class="match-item right" data-index="${i}" data-value="${r}" onclick="selectMatch(this, 'right')">
+                            ${r}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <div id="matchFeedback" style="margin-top: 16px; text-align: center;"></div>
+        </div>
+    `;
+}
+
+function selectMatch(el, side) {
+    const chapter = CHAPTERS[currentChapter];
+    const value = el.getAttribute('data-value');
+    
+    // Remove previous selection on same side
+    document.querySelectorAll(`.match-item.${side}`).forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    el.classList.add('selected');
+    matchingState[side] = { element: el, value: value };
+    
+    // Check if both sides selected
+    if (matchingState.left && matchingState.right) {
+        // Find if it's a correct pair
+        const isCorrect = chapter.pairs.some(p => 
+            p.left === matchingState.left.value && 
+            p.right === matchingState.right.value
+        );
+        
+        if (isCorrect) {
+            matchingState.left.element.classList.add('matched');
+            matchingState.right.element.classList.add('matched');
+            matchingState.left.element.classList.remove('selected');
+            matchingState.right.element.classList.remove('selected');
+            matchingState.left.element.onclick = null;
+            matchingState.right.element.onclick = null;
+            matchingState.matched.push(matchingState.left.value);
+            sessionStats.correct++;
+        } else {
+            matchingState.left.element.classList.add('wrong-match');
+            matchingState.right.element.classList.add('wrong-match');
+            sessionStats.wrong++;
+            
+            setTimeout(() => {
+                matchingState.left.element.classList.remove('wrong-match', 'selected');
+                matchingState.right.element.classList.remove('wrong-match', 'selected');
+            }, 500);
+        }
+        
+        sessionStats.total++;
+        matchingState.left = null;
+        matchingState.right = null;
+        
+        // Check if all matched
+        if (matchingState.matched.length === chapter.pairs.length) {
+            document.getElementById('matchFeedback').innerHTML = `
+                <div style="padding: 16px; background: var(--success); border-radius: var(--radius-sm); color: var(--bg-dark);">
+                    <strong>Alle richtig zugeordnet!</strong>
+                </div>
+            `;
+        }
+    }
+}
+
 function renderResult() {
     const content = document.getElementById('contentArea');
     const accuracy = sessionStats.total > 0 ? Math.round((sessionStats.correct / sessionStats.total) * 100) : 0;
     
     content.innerHTML = `
         <div class="result-hero">
-            <div style="font-size: 4rem;">🏆</div>
+            <div style="font-size: 3rem; color: var(--success); font-weight: bold;">GESCHAFFT!</div>
             <h2>Kurs abgeschlossen!</h2>
             <p style="color: var(--text-muted);">Du hast alle Kapitel durchgearbeitet.</p>
         </div>
@@ -1458,12 +1858,27 @@ function renderResult() {
             </ul>
         </div>
         
-        <div class="nav-buttons">
+        <div class="content-card" style="margin-top: 16px;">
+            <h2>Merkhilfen</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 12px;">
+                <strong>MGK-Sätze:</strong> H-H-O (Handelswaren-Höchster, Hörgeräte, Otoplastik)<br>
+                108% - 32,8% - 35,4%
+            </p>
+            <p style="color: var(--text-secondary); margin-bottom: 12px;">
+                <strong>Schema:</strong> "Mein Mensch Sucht Neue Bücher"<br>
+                MEK → Mges → Sk → NVP → BVP
+            </p>
+            <p style="color: var(--text-secondary);">
+                <strong>Porto:</strong> Immer ZUERST addieren, DANN MGK berechnen!
+            </p>
+        </div>
+        
+        <div class="nav-buttons" style="margin-top: 20px;">
             <button type="button" class="btn btn-secondary" onclick="restartCourse()">
-                🔄 Kurs wiederholen
+                Kurs wiederholen
             </button>
             <a href="./profil.html" class="btn btn-primary" style="text-decoration: none;">
-                👤 Zum Profil
+                Zum Profil
             </a>
         </div>
     `;
@@ -1597,9 +2012,9 @@ const CHAPTER_HELP = {
         content: `
             <h4>Die drei MGK-Sätze</h4>
             <table style="width: 100%; margin: 16px 0;">
-                <tr><td>🔊 Hörgeräte</td><td style="text-align: right; color: var(--accent);"><strong>32,8%</strong></td></tr>
-                <tr><td>👂 Otoplastik/Material</td><td style="text-align: right; color: var(--success);"><strong>35,4%</strong></td></tr>
-                <tr><td>⏰ Handelswaren</td><td style="text-align: right; color: var(--warning);"><strong>108%</strong></td></tr>
+                <tr><td>Hörgeräte</td><td style="text-align: right; color: var(--accent);"><strong>32,8%</strong></td></tr>
+                <tr><td>Otoplastik/Material</td><td style="text-align: right; color: var(--success);"><strong>35,4%</strong></td></tr>
+                <tr><td>Handelswaren</td><td style="text-align: right; color: var(--warning);"><strong>108%</strong></td></tr>
             </table>
             <h4>Stundensätze</h4>
             <table style="width: 100%; margin: 16px 0;">
@@ -1608,7 +2023,7 @@ const CHAPTER_HELP = {
                 <tr><td>Werkstatt</td><td style="text-align: right;">58,90 €/h</td></tr>
             </table>
             <h4>Eselsbrücke</h4>
-            <p>📦 <strong>H</strong>andelswaren = <strong>H</strong>öchster Satz (108%)</p>
+            <p><strong>Merke: H</strong>andelswaren = <strong>H</strong>öchster Satz (108%)</p>
         `
     },
     3: {
@@ -1665,7 +2080,7 @@ const CHAPTER_HELP = {
     6: {
         title: "Hilfe: Aufgabe 4 (Wecksystem)",
         content: `
-            <h4>⚠️ Achtung: Handelsware!</h4>
+            <h4>ACHTUNG: Handelsware!</h4>
             <p>Ein Wecksystem ist eine <strong>Handelsware</strong>, daher:</p>
             <ul>
                 <li>MGK-Satz: <strong style="color: var(--warning);">108%</strong> (nicht 35,4%!)</li>
@@ -1683,7 +2098,7 @@ const CHAPTER_HELP = {
     7: {
         title: "Hilfe: Aufgabe 9 (Otoplastik)",
         content: `
-            <h4>⚠️ Der Porto-Trick!</h4>
+            <h4>Der Porto-Trick!</h4>
             <p>Bei Transportkosten gilt:</p>
             <ol>
                 <li><strong>ZUERST</strong> Porto zu MEK addieren</li>
@@ -1739,6 +2154,41 @@ const CHAPTER_HELP = {
                 <tr><td>Sk → Mges</td><td style="text-align: right;">- Fertigungskosten</td></tr>
                 <tr><td>Mges → MEK</td><td style="text-align: right;">÷ (1 + MGK%)</td></tr>
             </table>
+        `
+    },
+    11: {
+        title: "Hilfe: Batterien",
+        content: `
+            <h4>ACHTUNG: Handelsware!</h4>
+            <p>Batterien sind <strong>Handelswaren</strong>, daher:</p>
+            <ul>
+                <li>MGK-Satz: <strong style="color: var(--warning);">108%</strong></li>
+            </ul>
+            <h4>Rechnung:</h4>
+            <p>MEK = 6 × 2,50 = <strong>15,00 €</strong></p>
+        `
+    },
+    12: {
+        title: "Hilfe: Reinigungsset",
+        content: `
+            <h4>Zwei Besonderheiten!</h4>
+            <ul>
+                <li>Pflegeset = <strong>Handelsware = 108%</strong></li>
+                <li>Versandkosten = <strong>ZUERST addieren!</strong></li>
+            </ul>
+            <h4>Rechnung:</h4>
+            <p>MEK = 8,90 + 1,50 = <strong>10,40 €</strong></p>
+            <p>Keine Fertigungskosten (keine Beratung)</p>
+        `
+    },
+    15: {
+        title: "Hilfe: Gehörschutz",
+        content: `
+            <h4>Materialberechnung</h4>
+            <p>MEK = Grundmaterial + 2 × Filter</p>
+            <p>MEK = 15,60 + (2 × 4,20) = <strong>24,00 €</strong></p>
+            <h4>Kategorie</h4>
+            <p>Gehörschutz = Material/Otoplastik = <strong>35,4%</strong></p>
         `
     },
     default: {
