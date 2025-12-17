@@ -1,5 +1,5 @@
 // ===== SERVICE WORKER - OFFLINE SUPPORT =====
-const CACHE_NAME = 'kalktrainer-v3';
+const CACHE_NAME = 'kalktrainer-v4';
 
 // Use relative paths from the root
 const ASSETS = [
