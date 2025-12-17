@@ -1794,13 +1794,17 @@ function selectMatch(el, side) {
             matchingState.matched.push(matchingState.left.value);
             sessionStats.correct++;
         } else {
-            matchingState.left.element.classList.add('wrong-match');
-            matchingState.right.element.classList.add('wrong-match');
+            // Store references before resetting state
+            const leftEl = matchingState.left.element;
+            const rightEl = matchingState.right.element;
+            
+            leftEl.classList.add('wrong-match');
+            rightEl.classList.add('wrong-match');
             sessionStats.wrong++;
             
             setTimeout(() => {
-                matchingState.left.element.classList.remove('wrong-match', 'selected');
-                matchingState.right.element.classList.remove('wrong-match', 'selected');
+                leftEl.classList.remove('wrong-match', 'selected');
+                rightEl.classList.remove('wrong-match', 'selected');
             }, 500);
         }
         
