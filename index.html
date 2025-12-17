@@ -30,7 +30,9 @@
 
     <!-- Header -->
     <div class="header">
-        <div class="header-icon">📊</div>
+        <div class="header-icon">
+            <svg class="icon icon-2xl" style="color: var(--accent);" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="10" x2="8" y2="10"></line><line x1="12" y1="10" x2="12" y2="10"></line><line x1="16" y1="10" x2="16" y2="10"></line><line x1="8" y1="14" x2="8" y2="14"></line><line x1="12" y1="14" x2="12" y2="14"></line><line x1="16" y1="14" x2="16" y2="14"></line><line x1="8" y1="18" x2="8" y2="18"></line></svg>
+        </div>
         <h1>Kalkulations-Trainer</h1>
         <p>Lernfeld 17.2 · Hörakustik</p>
     </div>
@@ -72,7 +74,8 @@
         </div>
 
         <button type="button" class="btn btn-primary btn-block btn-lg" id="startBtn">
-            🚀 Los geht's
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
+            Los geht's
         </button>
     </div>
 
@@ -89,28 +92,41 @@
     <!-- Info Card -->
     <div class="card">
         <div class="card-header">
-            <span class="card-title">ℹ️ Info</span>
+            <span class="card-title">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                Info
+            </span>
         </div>
         <p class="text-muted" style="font-size: 0.9rem; line-height: 1.6;">
             Übe alle 11 Kalkulationsaufgaben aus Lernfeld 17.2. 
             Dein Fortschritt wird gespeichert, auch wenn du die App schließt.
         </p>
         <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
-            <span class="badge" id="storageBadge">✓ Speichern möglich</span>
-            <span class="badge">✓ Zufallsaufgaben</span>
+            <span class="badge" id="storageBadge">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Speichern
+            </span>
+            <span class="badge">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Zufallsaufgaben
+            </span>
         </div>
     </div>
 
     <!-- Install Prompt -->
     <div class="card" id="installCard" style="display: none;">
         <div class="card-header">
-            <span class="card-title">📱 Als App installieren</span>
+            <span class="card-title">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Als App installieren
+            </span>
         </div>
         <p class="text-muted mb-2" style="font-size: 0.9rem;">
             Installiere die App auf deinem Homescreen für schnellen Zugriff!
         </p>
         <button type="button" class="btn btn-secondary btn-block" id="installBtn">
-            ⬇️ Installieren
+            <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Installieren
         </button>
     </div>
 
@@ -146,10 +162,11 @@
 </div>
 
 <!-- Scripts - storage.js MUST come before profiles.js -->
-<script src="./js/storage.js?v=5"></script>
-<script src="./js/profanity.js?v=5"></script>
-<script src="./js/profiles.js?v=5"></script>
-<script src="./js/generator.js?v=5"></script>
+<script src="./js/storage.js?v=6"></script>
+<script src="./js/profanity.js?v=6"></script>
+<script src="./js/profiles.js?v=6"></script>
+<script src="./js/generator.js?v=6"></script>
+<script src="./js/icons.js?v=6"></script>
 <script>
 // ===== APP INITIALIZATION =====
 

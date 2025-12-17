@@ -1,5 +1,5 @@
 // ===== SERVICE WORKER - OFFLINE SUPPORT =====
-const CACHE_NAME = 'kalktrainer-v5';
+const CACHE_NAME = 'kalktrainer-v6';
 
 // Use relative paths from the root
 const ASSETS = [
@@ -9,11 +9,13 @@ const ASSETS = [
   './trainer.html',
   './ergebnis.html',
   './profil.html',
+  './kurs.html',
   './css/style.css',
   './js/storage.js',
   './js/profanity.js',
   './js/profiles.js',
   './js/generator.js',
+  './js/icons.js',
   './manifest.json',
   './icons/icon.svg'
 ];

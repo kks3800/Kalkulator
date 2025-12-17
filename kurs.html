@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kurs | Kalkulations-Trainer</title>
+    <meta name="theme-color" content="#0a0a1a">
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="bg-particles"></div>
+
+<div class="container">
+
+    <!-- Header -->
+    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+        <a href="./home.html" class="btn btn-secondary" style="padding: 12px; border-radius: 50%;" id="backBtn">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </a>
+        <div style="flex: 1;">
+            <h1 style="font-size: 1.25rem; margin-bottom: 2px;">Geführter Kurs</h1>
+            <p class="text-muted" style="font-size: 0.85rem;" id="courseSubtitle">Lerne Schritt für Schritt</p>
+        </div>
+        <span class="badge" id="progressBadge">0/12</span>
+    </div>
+
+    <!-- Course Progress -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Dein Fortschritt</span>
+        </div>
+        <div class="course-progress" id="courseProgress">
+            <!-- Filled by JS -->
+        </div>
+    </div>
+
+    <!-- Current Step Content -->
+    <div id="stepContent">
+        <!-- Filled by JS -->
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;" id="navButtons">
+        <button type="button" class="btn btn-secondary" id="prevBtn" disabled>
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Zurück
+        </button>
+        <button type="button" class="btn btn-primary" id="nextBtn">
+            Weiter
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+    </div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+    <a href="./home.html" class="nav-item">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Home</span>
+    </a>
+    <a href="./trainer.html" class="nav-item">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="10" x2="8" y2="10"></line><line x1="12" y1="10" x2="12" y2="10"></line><line x1="16" y1="10" x2="16" y2="10"></line><line x1="8" y1="14" x2="8" y2="14"></line><line x1="12" y1="14" x2="12" y2="14"></line><line x1="16" y1="14" x2="16" y2="14"></line><line x1="8" y1="18" x2="8" y2="18"></line></svg>
+        <span>Üben</span>
+    </a>
+    <a href="./kurs.html" class="nav-item active">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
+        <span>Kurs</span>
+    </a>
+    <a href="./profil.html" class="nav-item">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>Profil</span>
+    </a>
+</nav>
+
+<!-- Scripts -->
+<script src="./js/storage.js?v=6"></script>
+<script src="./js/profanity.js?v=6"></script>
+<script src="./js/profiles.js?v=6"></script>
+<script src="./js/generator.js?v=6"></script>
+<script src="./js/icons.js?v=6"></script>
+<script>
+// Course Steps
+const COURSE_STEPS = [
+    {
+        type: 'intro',
+        title: 'Willkommen zum Kurs!',
+        content: `
+            <div class="course-card">
+                <div style="font-size: 4rem; margin-bottom: 16px;">
+                    <svg class="icon icon-2xl" style="color: var(--accent);" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
+                </div>
+                <h2>Kalkulations-Kurs</h2>
+                <p>In diesem Kurs lernst du Schritt für Schritt alle 11 Kalkulationsaufgaben.</p>
+            </div>
+            <div class="explanation-card">
+                <h4><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg> Was du lernen wirst</h4>
+                <ul>
+                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Vorwärtskalkulation (MEK → BVP)</li>
+                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Rückwärtskalkulation (BVP → MEK)</li>
+                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Rabatt- und Skonto-Berechnungen</li>
+                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> GKV-Zuzahlungen berechnen</li>
+                </ul>
+            </div>
+        `
+    },
+    {
+        type: 'theory',
+        title: 'Grundlagen: Das Kalkulationsschema',
+        content: `
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Das Schema</span>
+                </div>
+                <div style="font-family: monospace; font-size: 0.9rem; line-height: 2; color: var(--text-secondary);">
+                    <div style="display: flex; justify-content: space-between;"><span>Listenpreis / Einkauf</span><span class="text-muted">→ MEK</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>+ Bezugskosten (Porto)</span></div>
+                    <div style="display: flex; justify-content: space-between; color: var(--accent);"><strong>= Materialeinzelkosten (MEK)</strong></div>
+                    <div style="display: flex; justify-content: space-between;"><span>+ Materialgemeinkosten (MGK)</span><span class="text-muted">%</span></div>
+                    <div style="display: flex; justify-content: space-between; color: var(--accent);"><strong>= Materialgesamtkosten (Mges)</strong></div>
+                    <div style="display: flex; justify-content: space-between;"><span>+ Fertigungskosten</span><span class="text-muted">Min × €/h</span></div>
+                    <div style="display: flex; justify-content: space-between; color: var(--success);"><strong>= Selbstkosten (Sk)</strong></div>
+                    <div style="display: flex; justify-content: space-between;"><span>+ Gewinn</span><span class="text-muted">%</span></div>
+                    <div style="display: flex; justify-content: space-between; color: var(--success);"><strong>= Nettoverkaufspreis (NVP)</strong></div>
+                    <div style="display: flex; justify-content: space-between;"><span>+ MwSt (19%)</span></div>
+                    <div style="display: flex; justify-content: space-between; color: var(--warning);"><strong>= Bruttoverkaufspreis (BVP)</strong></div>
+                </div>
+            </div>
+            <div class="explanation-card">
+                <h4><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Wichtig zu merken</h4>
+                <ul>
+                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Porto ZUERST zu MEK, DANN MGK-Zuschlag</li>
+                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Fertigungskosten: Minuten ÷ 60 × Stundensatz</li>
+                    <li><svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> BVP = NVP × 1,19</li>
+                </ul>
+            </div>
+        `
+    },
+    {
+        type: 'theory',
+        title: 'Die MGK-Zuschlagssätze',
+        content: `
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Zuschlagssätze merken!</span>
+                </div>
+                <div style="display: grid; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm); border-left: 4px solid var(--accent);">
+                        <span>Hörgeräte</span>
+                        <span class="text-accent" style="font-weight: 700; font-size: 1.2rem;">32,8 %</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm); border-left: 4px solid var(--success);">
+                        <span>Otoplastik / Material</span>
+                        <span class="text-success" style="font-weight: 700; font-size: 1.2rem;">35,4 %</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm); border-left: 4px solid var(--warning);">
+                        <span>Handelswaren</span>
+                        <span class="text-warning" style="font-weight: 700; font-size: 1.2rem;">108 %</span>
+                    </div>
+                </div>
+            </div>
+            <div class="explanation-card">
+                <h4><svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> Achtung: Handelswaren!</h4>
+                <p style="color: var(--text-secondary);">
+                    Wecksysteme, Batterien und andere Zubehörteile sind <strong style="color: var(--warning);">Handelswaren</strong> mit 108% MGK!
+                </p>
+            </div>
+        `
+    },
+    {
+        type: 'theory',
+        title: 'Die Fertigungsstundensätze',
+        content: `
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Stundensätze</span>
+                </div>
+                <div style="display: grid; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm);">
+                        <span>HG-Anpassung</span>
+                        <span class="text-accent" style="font-weight: 700;">60,50 €/h</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm);">
+                        <span>Audiometrie</span>
+                        <span class="text-accent" style="font-weight: 700;">63,40 €/h</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 16px; background: var(--glass-bg); border-radius: var(--radius-sm);">
+                        <span>Werkstatt / Labor</span>
+                        <span class="text-accent" style="font-weight: 700;">58,90 €/h</span>
+                    </div>
+                </div>
+            </div>
+            <div class="explanation-card">
+                <h4><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg> Formel</h4>
+                <p style="color: var(--text-secondary); font-family: monospace; font-size: 1.1rem; text-align: center; padding: 16px;">
+                    Fertigungskosten = (Minuten ÷ 60) × Stundensatz
+                </p>
+            </div>
+        `
+    },
+    {
+        type: 'task',
+        taskId: 3,
+        title: 'Aufgabe 3: Hörgerätereparatur',
+        intro: 'Deine erste Vorwärtskalkulation! Berechne den BVP für eine Reparatur.'
+    },
+    {
+        type: 'task',
+        taskId: 4,
+        title: 'Aufgabe 4: Wecksystem',
+        intro: 'Achtung: Wecksysteme sind Handelswaren mit 108% MGK!'
+    },
+    {
+        type: 'task',
+        taskId: 9,
+        title: 'Aufgabe 9: Otoplastik',
+        intro: 'Wichtig: Transportkosten ZUERST zu MEK addieren!'
+    },
+    {
+        type: 'task',
+        taskId: 6,
+        title: 'Aufgabe 6: Paar Hörgeräte',
+        intro: 'Komplexere Aufgabe mit zwei verschiedenen Arbeitszeiten.'
+    },
+    {
+        type: 'task',
+        taskId: 11,
+        title: 'Aufgabe 11: Gehörschutz',
+        intro: 'Materialkosten + 2×Filter = Gesamt-MEK'
+    },
+    {
+        type: 'theory',
+        title: 'Rückrechnung: Das Prinzip',
+        content: `
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Rückwärts rechnen</span>
+                </div>
+                <p class="text-muted mb-2">Bei Rückrechnungen startest du beim BVP und rechnest zurück:</p>
+                <div style="font-family: monospace; font-size: 0.9rem; line-height: 2; color: var(--text-secondary);">
+                    <div>BVP (Bruttopreis)</div>
+                    <div>÷ 1,19 = NVP</div>
+                    <div>÷ (1 + Gewinn%) = Sk</div>
+                    <div>- Fertigungskosten</div>
+                    <div>÷ (1 + MGK%) = MEK</div>
+                </div>
+            </div>
+            <div class="explanation-card">
+                <h4><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg> Tipp</h4>
+                <p style="color: var(--text-secondary);">
+                    Jeder Schritt ist das Gegenteil der Vorwärtskalkulation. Statt × 1,19 → ÷ 1,19
+                </p>
+            </div>
+        `
+    },
+    {
+        type: 'practice',
+        title: 'Übungsaufgaben',
+        content: `
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 4rem; margin-bottom: 16px;">
+                    <svg class="icon icon-2xl" style="color: var(--success);" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path></svg>
+                </div>
+                <h3 style="margin-bottom: 8px;">Gut gemacht!</h3>
+                <p class="text-muted mb-2">Du hast die Grundlagen gelernt. Jetzt kannst du alle Aufgaben üben.</p>
+            </div>
+            <a href="./trainer.html" class="btn btn-primary btn-block btn-lg" style="text-decoration: none;">
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                Zum Übungsmodus
+            </a>
+        `
+    },
+    {
+        type: 'finish',
+        title: 'Kurs abgeschlossen!',
+        content: `
+            <div class="course-card" style="background: linear-gradient(135deg, rgba(0, 204, 136, 0.2), rgba(0, 245, 212, 0.1)); border-color: var(--success);">
+                <div style="font-size: 4rem; margin-bottom: 16px;">
+                    <svg class="icon icon-2xl" style="color: var(--success);" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+                </div>
+                <h2 style="color: var(--success);">Gratulation!</h2>
+                <p>Du hast den Kurs erfolgreich abgeschlossen!</p>
+            </div>
+            <div class="card">
+                <h4 style="margin-bottom: 12px;">Nächste Schritte:</h4>
+                <ul style="list-style: none;">
+                    <li style="padding: 12px 0; border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; gap: 12px;">
+                        <svg class="icon" style="color: var(--accent);" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Übe alle 11 Aufgaben im Übungsmodus
+                    </li>
+                    <li style="padding: 12px 0; border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; gap: 12px;">
+                        <svg class="icon" style="color: var(--accent);" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Nutze Zufallszahlen für mehr Übung
+                    </li>
+                    <li style="padding: 12px 0; display: flex; align-items: center; gap: 12px;">
+                        <svg class="icon" style="color: var(--accent);" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Viel Erfolg bei der Prüfung!
+                    </li>
+                </ul>
+            </div>
+            <a href="./home.html" class="btn btn-success btn-block btn-lg" style="text-decoration: none;">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Zur Startseite
+            </a>
+        `
+    }
+];
+
+let currentStep = 0;
+
+// Render progress bar
+function renderProgress() {
+    const container = document.getElementById('courseProgress');
+    container.innerHTML = '';
+    
+    COURSE_STEPS.forEach((step, i) => {
+        const stepEl = document.createElement('div');
+        stepEl.className = 'course-step';
+        
+        if (i < currentStep) {
+            stepEl.classList.add('completed');
+            stepEl.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        } else if (i === currentStep) {
+            stepEl.classList.add('current');
+            stepEl.textContent = i + 1;
+        } else {
+            stepEl.classList.add('locked');
+            stepEl.textContent = i + 1;
+        }
+        
+        container.appendChild(stepEl);
+        
+        if (i < COURSE_STEPS.length - 1) {
+            const connector = document.createElement('div');
+            connector.className = 'course-connector';
+            if (i < currentStep) connector.classList.add('completed');
+            container.appendChild(connector);
+        }
+    });
+    
+    document.getElementById('progressBadge').textContent = `${currentStep + 1}/${COURSE_STEPS.length}`;
+}
+
+// Render current step
+function renderStep() {
+    const step = COURSE_STEPS[currentStep];
+    const container = document.getElementById('stepContent');
+    
+    document.getElementById('courseSubtitle').textContent = step.title;
+    
+    if (step.type === 'task') {
+        // Task step - link to trainer
+        container.innerHTML = `
+            <div class="course-card">
+                <h2>${step.title}</h2>
+                <p>${step.intro}</p>
+            </div>
+            <a href="./trainer.html?task=${step.taskId}&kurs=1" class="btn btn-primary btn-block btn-lg" style="text-decoration: none;">
+                <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                Aufgabe starten
+            </a>
+        `;
+    } else {
+        container.innerHTML = step.content;
+    }
+    
+    // Update nav buttons
+    document.getElementById('prevBtn').disabled = currentStep === 0;
+    
+    if (currentStep === COURSE_STEPS.length - 1) {
+        document.getElementById('nextBtn').style.display = 'none';
+    } else {
+        document.getElementById('nextBtn').style.display = 'flex';
+    }
+    
+    renderProgress();
+    
+    // Save progress
+    saveCourseProgress();
+}
+
+// Navigation
+document.getElementById('prevBtn').addEventListener('click', () => {
+    if (currentStep > 0) {
+        currentStep--;
+        renderStep();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+});
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+    if (currentStep < COURSE_STEPS.length - 1) {
+        currentStep++;
+        renderStep();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+});
+
+// Save/Load progress
+function saveCourseProgress() {
+    try {
+        localStorage.setItem('kurs_progress', currentStep.toString());
+    } catch (e) {}
+}
+
+function loadCourseProgress() {
+    try {
+        const saved = localStorage.getItem('kurs_progress');
+        if (saved) {
+            currentStep = parseInt(saved) || 0;
+        }
+    } catch (e) {}
+}
+
+// Check for return from task
+const params = new URLSearchParams(window.location.search);
+if (params.get('completed')) {
+    loadCourseProgress();
+    currentStep++;
+    if (currentStep >= COURSE_STEPS.length) currentStep = COURSE_STEPS.length - 1;
+} else {
+    loadCourseProgress();
+}
+
+// Init
+renderStep();
+</script>
+
+</body>
+</html>
+
