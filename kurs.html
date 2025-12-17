@@ -414,6 +414,46 @@
             color: #a78bfa;
             margin-bottom: 8px;
         }
+        
+        /* Floating Help Button */
+        .floating-help-btn {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .floating-help-btn:hover,
+        .floating-help-btn:active {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.6);
+        }
+        
+        /* Skip button style */
+        .btn-skip {
+            background: transparent !important;
+            border-color: var(--text-muted) !important;
+            color: var(--text-muted) !important;
+            font-size: 0.85rem;
+        }
+        .btn-skip:hover {
+            border-color: var(--accent) !important;
+            color: var(--accent) !important;
+        }
     </style>
 </head>
 <body>
@@ -443,14 +483,22 @@
     </div>
 
     <!-- Navigation Buttons -->
-    <div class="nav-buttons" id="navButtons">
+    <div class="nav-buttons" id="navButtons" style="grid-template-columns: 1fr 1fr 1fr;">
         <button type="button" class="btn btn-secondary" id="prevBtn" disabled>
             ← Zurück
+        </button>
+        <button type="button" class="btn btn-secondary" id="skipBtn" style="background: transparent; border-color: var(--text-muted); color: var(--text-muted);">
+            Überspringen
         </button>
         <button type="button" class="btn btn-primary" id="nextBtn">
             Weiter →
         </button>
     </div>
+    
+    <!-- Help Button (floating) -->
+    <button type="button" class="floating-help-btn" id="floatingHelpBtn" onclick="showChapterHelp()">
+        ?
+    </button>
 
 </div>
 
@@ -1098,7 +1146,8 @@ function renderQuiz(chapter) {
     const content = document.getElementById('contentArea');
     quizAnswers = new Array(chapter.questions.length).fill(-1);
     
-    let html = `<div class="content-card"><h2>Quiz: Teste dein Wissen!</h2>`;
+    let html = `<div class="content-card"><h2>Quiz: Teste dein Wissen!</h2>
+        <p class="text-muted" style="margin-bottom: 16px;">Wähle die richtigen Antworten oder überspringe mit dem Button unten.</p>`;
     
     chapter.questions.forEach((q, qIndex) => {
         html += `
@@ -1122,7 +1171,6 @@ function renderQuiz(chapter) {
     </div>`;
     
     content.innerHTML = html;
-    document.getElementById('nextBtn').disabled = true;
 }
 
 function selectQuizOption(qIndex, oIndex) {
@@ -1184,6 +1232,7 @@ function renderSorting(chapter) {
         <div class="content-card">
             <h2>🎮 Sortier-Spiel</h2>
             <p>${chapter.instruction}</p>
+            <p class="text-muted" style="font-size: 0.85rem;">Du kannst auch überspringen wenn du möchtest.</p>
             
             <p style="color: var(--text-muted); font-size: 0.85rem; margin: 16px 0;">
                 Tippe auf die Begriffe in der richtigen Reihenfolge:
@@ -1213,8 +1262,6 @@ function renderSorting(chapter) {
             <div id="sortFeedback"></div>
         </div>
     `;
-    
-    document.getElementById('nextBtn').disabled = true;
 }
 
 function selectSortItem(el) {
@@ -1295,6 +1342,7 @@ function renderFillBlank(chapter) {
         <div class="content-card">
             <h2>✏️ Lückentext</h2>
             <p>${chapter.instruction}</p>
+            <p class="text-muted" style="font-size: 0.85rem;">Du kannst auch überspringen wenn du möchtest.</p>
             
             <div style="margin-top: 20px;">
     `;
@@ -1328,7 +1376,6 @@ function renderFillBlank(chapter) {
     `;
     
     content.innerHTML = html;
-    document.getElementById('nextBtn').disabled = true;
 }
 
 function checkFillBlank() {
@@ -1465,29 +1512,40 @@ function updateNavButtons() {
     const chapter = CHAPTERS[currentChapter];
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    const navButtons = document.getElementById('navButtons');
     
     prevBtn.disabled = currentChapter === 0;
     
-    // For exercises, disable next until checked
-    if (chapter.type === 'exercise') {
-        nextBtn.textContent = 'Prüfen ✓';
-        nextBtn.onclick = () => {
-            if (nextBtn.textContent.includes('Prüfen')) {
+    // Always allow navigation - user can skip or go back freely
+    nextBtn.disabled = false;
+    nextBtn.textContent = 'Weiter →';
+    nextBtn.onclick = goNext;
+    
+    // Show/hide skip button based on chapter type
+    if (chapter.type === 'exercise' || chapter.type === 'quiz' || chapter.type === 'sorting' || chapter.type === 'fillblank') {
+        skipBtn.style.display = 'flex';
+        navButtons.style.gridTemplateColumns = '1fr 1fr 1fr';
+        
+        // For exercises, offer "Prüfen" as the main action but still allow skip
+        if (chapter.type === 'exercise') {
+            nextBtn.textContent = 'Prüfen ✓';
+            nextBtn.onclick = () => {
                 checkExercise();
                 nextBtn.textContent = 'Weiter →';
                 nextBtn.onclick = goNext;
-            }
-        };
-    } else if (chapter.type === 'quiz' || chapter.type === 'sorting' || chapter.type === 'fillblank') {
-        nextBtn.disabled = true;
-        nextBtn.textContent = 'Weiter →';
-        nextBtn.onclick = goNext;
-    } else if (chapter.type === 'result') {
-        // Hide for result page
+            };
+        }
     } else {
-        nextBtn.disabled = false;
-        nextBtn.textContent = 'Weiter →';
-        nextBtn.onclick = goNext;
+        skipBtn.style.display = 'none';
+        navButtons.style.gridTemplateColumns = '1fr 1fr';
+    }
+    
+    // Hide everything for result page
+    if (chapter.type === 'result') {
+        navButtons.style.display = 'none';
+    } else {
+        navButtons.style.display = 'grid';
     }
 }
 
@@ -1518,9 +1576,210 @@ function closeHint() {
     document.getElementById('hintModal').classList.remove('show');
 }
 
+// ===== CHAPTER HELP =====
+const CHAPTER_HELP = {
+    1: {
+        title: "Hilfe: Einführung",
+        content: `
+            <h4>Was lernst du hier?</h4>
+            <p>In diesem Kapitel lernst du die Grundlagen der Kalkulation:</p>
+            <ul>
+                <li><strong>Kalkulation</strong> = Preisberechnung vom Einkauf zum Verkauf</li>
+                <li>Das Schema zeigt alle Schritte in der richtigen Reihenfolge</li>
+                <li>Jeder Schritt baut auf dem vorherigen auf</li>
+            </ul>
+            <h4>Tipp</h4>
+            <p>Präge dir die Reihenfolge ein: MEK → Mges → Sk → NVP → BVP</p>
+        `
+    },
+    2: {
+        title: "Hilfe: Zuschläge",
+        content: `
+            <h4>Die drei MGK-Sätze</h4>
+            <table style="width: 100%; margin: 16px 0;">
+                <tr><td>🔊 Hörgeräte</td><td style="text-align: right; color: var(--accent);"><strong>32,8%</strong></td></tr>
+                <tr><td>👂 Otoplastik/Material</td><td style="text-align: right; color: var(--success);"><strong>35,4%</strong></td></tr>
+                <tr><td>⏰ Handelswaren</td><td style="text-align: right; color: var(--warning);"><strong>108%</strong></td></tr>
+            </table>
+            <h4>Stundensätze</h4>
+            <table style="width: 100%; margin: 16px 0;">
+                <tr><td>HG-Anpassung</td><td style="text-align: right;">60,50 €/h</td></tr>
+                <tr><td>Audiometrie</td><td style="text-align: right;">63,40 €/h</td></tr>
+                <tr><td>Werkstatt</td><td style="text-align: right;">58,90 €/h</td></tr>
+            </table>
+            <h4>Eselsbrücke</h4>
+            <p>📦 <strong>H</strong>andelswaren = <strong>H</strong>öchster Satz (108%)</p>
+        `
+    },
+    3: {
+        title: "Hilfe: Beispielrechnung",
+        content: `
+            <h4>Schritt-für-Schritt</h4>
+            <ol style="line-height: 2;">
+                <li><strong>MEK</strong> = Einkaufspreis + Porto</li>
+                <li><strong>MGK</strong> = MEK × Zuschlag%</li>
+                <li><strong>Mges</strong> = MEK + MGK</li>
+                <li><strong>Fert</strong> = (Minuten ÷ 60) × Stundensatz</li>
+                <li><strong>Sk</strong> = Mges + Fertigung</li>
+                <li><strong>NVP</strong> = Sk × (1 + Gewinn%)</li>
+                <li><strong>BVP</strong> = NVP × 1,19</li>
+            </ol>
+        `
+    },
+    4: {
+        title: "Hilfe: Aufgabe 3 (Reparatur)",
+        content: `
+            <h4>Was ist gegeben?</h4>
+            <ul>
+                <li>Ersatzteil: <strong>65,50 €</strong> → Das ist dein MEK</li>
+                <li>Arbeitszeit: <strong>35 Minuten</strong> Werkstatt</li>
+                <li>Gewinn: <strong>9%</strong></li>
+                <li>Pauschale: <strong>6,95 €</strong> → Zu Selbstkosten addieren!</li>
+            </ul>
+            <h4>Welche Werte eintragen?</h4>
+            <ul>
+                <li>MEK: 65,50</li>
+                <li>MGK: 35,4% (Material/Reparatur)</li>
+                <li>Minuten: 35</li>
+                <li>Rate: 58,90 (Werkstatt)</li>
+                <li>Pauschale: 6,95</li>
+                <li>Gewinn: 9</li>
+            </ul>
+        `
+    },
+    5: {
+        title: "Hilfe: Handelswaren",
+        content: `
+            <h4>Was sind Handelswaren?</h4>
+            <p>Produkte, die der Akustiker nicht selbst herstellt:</p>
+            <ul>
+                <li>Wecksysteme / Lichtwecker</li>
+                <li>Batterien</li>
+                <li>Pflegeprodukte</li>
+                <li>Zubehör</li>
+            </ul>
+            <h4>Warum 108% MGK?</h4>
+            <p>Der hohe Zuschlag deckt Lager, Beratung und Vertrieb ab, da keine eigene Fertigung stattfindet.</p>
+        `
+    },
+    6: {
+        title: "Hilfe: Aufgabe 4 (Wecksystem)",
+        content: `
+            <h4>⚠️ Achtung: Handelsware!</h4>
+            <p>Ein Wecksystem ist eine <strong>Handelsware</strong>, daher:</p>
+            <ul>
+                <li>MGK-Satz: <strong style="color: var(--warning);">108%</strong> (nicht 35,4%!)</li>
+            </ul>
+            <h4>Werte zum Eintragen:</h4>
+            <ul>
+                <li>MEK: 55,00</li>
+                <li>MGK: <strong>108</strong></li>
+                <li>Minuten: 30</li>
+                <li>Rate: 60,50 (HG-Anpassung)</li>
+                <li>Gewinn: 12</li>
+            </ul>
+        `
+    },
+    7: {
+        title: "Hilfe: Aufgabe 9 (Otoplastik)",
+        content: `
+            <h4>⚠️ Der Porto-Trick!</h4>
+            <p>Bei Transportkosten gilt:</p>
+            <ol>
+                <li><strong>ZUERST</strong> Porto zu MEK addieren</li>
+                <li><strong>DANN</strong> MGK auf die Summe berechnen</li>
+            </ol>
+            <h4>Rechnung:</h4>
+            <p>MEK = 12,80 + 3,50 = <strong>16,30 €</strong></p>
+            <p>MGK = 16,30 × 35,4% = 5,77 €</p>
+            <h4>Werte:</h4>
+            <ul>
+                <li>MEK: 12,80</li>
+                <li>Porto: 3,50</li>
+                <li>MGK: 35,4%</li>
+            </ul>
+        `
+    },
+    8: {
+        title: "Hilfe: Quiz",
+        content: `
+            <h4>Quiz-Tipps</h4>
+            <ul>
+                <li>Wecksystem = Handelsware = <strong>108%</strong></li>
+                <li>Werkstatt = <strong>58,90 €/h</strong></li>
+                <li>Transportkosten <strong>VOR</strong> MGK addieren</li>
+                <li>BVP = NVP × <strong>1,19</strong></li>
+            </ul>
+        `
+    },
+    9: {
+        title: "Hilfe: Aufgabe 6 (Paar HG)",
+        content: `
+            <h4>Zwei verschiedene Arbeitszeiten!</h4>
+            <p>Diese Aufgabe hat zwei Fertigungskosten:</p>
+            <ul>
+                <li><strong>90 Min</strong> HG-Anpassung @ 60,50 €/h</li>
+                <li><strong>45 Min</strong> Audiometrie @ 63,40 €/h</li>
+            </ul>
+            <h4>Berechnung:</h4>
+            <p>Fert1 = (90÷60) × 60,50 = 90,75 €</p>
+            <p>Fert2 = (45÷60) × 63,40 = 47,55 €</p>
+            <h4>MGK-Satz:</h4>
+            <p>Hörgeräte = <strong>32,8%</strong></p>
+        `
+    },
+    10: {
+        title: "Hilfe: Rückrechnung",
+        content: `
+            <h4>Rückwärts = Umkehrung</h4>
+            <p>Statt zu addieren/multiplizieren, subtrahierst/dividierst du:</p>
+            <table style="width: 100%; margin: 16px 0;">
+                <tr><td>BVP → NVP</td><td style="text-align: right;">÷ 1,19</td></tr>
+                <tr><td>NVP → Sk</td><td style="text-align: right;">÷ (1 + Gewinn%)</td></tr>
+                <tr><td>Sk → Mges</td><td style="text-align: right;">- Fertigungskosten</td></tr>
+                <tr><td>Mges → MEK</td><td style="text-align: right;">÷ (1 + MGK%)</td></tr>
+            </table>
+        `
+    },
+    default: {
+        title: "Hilfe",
+        content: `
+            <h4>Allgemeine Tipps</h4>
+            <ul>
+                <li>Lies die Aufgabe <strong>genau</strong> durch</li>
+                <li>Achte auf den <strong>Produkttyp</strong> (Hörgerät, Otoplastik, Handelsware)</li>
+                <li>Bei Porto: <strong>Erst addieren</strong>, dann MGK berechnen!</li>
+                <li>Fertigungskosten: Minuten ÷ 60 × Stundensatz</li>
+                <li>Am Ende immer × 1,19 für MwSt</li>
+            </ul>
+            <h4>Häufige Fehler</h4>
+            <ul style="color: var(--danger);">
+                <li>Falschen MGK-Satz verwenden</li>
+                <li>Porto nach der MGK-Berechnung addieren</li>
+                <li>MwSt vergessen</li>
+            </ul>
+        `
+    }
+};
+
+function showChapterHelp() {
+    const chapter = CHAPTERS[currentChapter];
+    const help = CHAPTER_HELP[chapter.id] || CHAPTER_HELP.default;
+    
+    document.getElementById('hintTitle').textContent = help.title;
+    document.getElementById('hintBody').innerHTML = help.content;
+    document.getElementById('hintModal').classList.add('show');
+}
+
+function skip() {
+    // Skip without checking - just go to next chapter
+    goNext();
+}
+
 // ===== INIT =====
 document.getElementById('prevBtn').addEventListener('click', goPrev);
 document.getElementById('nextBtn').addEventListener('click', goNext);
+document.getElementById('skipBtn').addEventListener('click', skip);
 
 // Check profile
 STORAGE.onReady(async () => {
